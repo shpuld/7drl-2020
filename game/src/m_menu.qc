@@ -21,7 +21,7 @@ void() input_tester =
 	{
 		printme = strcat(printme, chr2str(char));
 	}
-	if (printme != "") printf("INPUT: %s\n", printme); 
+	// if (printme != "") printf("INPUT: %s\n", printme); 
 };
 
 void(string id, vector pos, vector size, float maxlen, __inout string text, __inout float cursor) text_input_control =
@@ -256,7 +256,7 @@ void() main_menu =
 	
 	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_START]);
 	
-	my_button("mm_start", [0, 8], [size_x - 16, 20], "Start Game") ? localcmd("map test\n") : 0;
+	my_button("mm_start", [0, 8], [size_x - 16, 20], "Start Game") ? localcmd("map bigbox\n") : 0;
 	my_button("mm_settings", [0, 8 + 24], [size_x - 16, 20], "Settings") ? current_menu = MENU_SETTINGS : 0;
 	my_button("mm_help", [0, 8 + 48], [size_x - 16, 20], "Help") ? current_menu = MENU_METAMAP : 0;
 	my_button("mm_tileeditor", [0, 8 + 48 + 24], [size_x - 16, 20], "Tile Editor") ? current_menu = MENU_TILEEDITOR : 0;

@@ -73,3 +73,96 @@ connect localhost
 disconnect
 connect localhost
 swap
+map bigbox
+swap
+swap
+gl_texturemode gl_linear
+gl_texturemode gl_nearest
+bind tab swap
+sv_minping
+sv_minping 100
+restart
+restart
+restart
+restart
+restart
+restart
+vid_reload
+vid_reload
+vid_reload
+sv_minping 0
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+bind tab
+bind tab
+toggleinventory
+restart
+restart
+toggleinventory
+restart
+toggleinventory
+restart
+toggleinventory
+restart
+toggleinventory
+restart
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+toggleinventory
+restart
+restart
+toggleinventory
+toggleinventory
+bind i toggleinventory
+vid_reload
+vid_reload
+r_renderscale 1
+fov 10
+sv_minping
+vid_reload
+vid_reload
+vid_reload
+bind tab
+bind tab "toggleinventory
+bind mwheelup swap
+bind mwheeldown swap
+bind mwheelip
+bind mwheelup
+bind mwheelup "swap"
+swap
+swap
+swap
+swap
+swap
+bind 1 swap
+bind 1 swap
+swap
+vid_reload
+slowmo 0.3
+slowmo 1
+r_renderscale -0.5
+modelviewer models/player.iqm"
+modelviewer models/player.iqm
+vid_reload
+vid_reload
+restart
+disconnect
