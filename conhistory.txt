@@ -1,0 +1,75 @@
+gl_nearest
+/gl_texturemode gl_nearest
+r_renderscale
+gl_texturemode nnl
+gl_texturemode nll
+gl_texturemode nnl
+/gl_texturemode n.l
+map bigbox
+r_renderscale -0.5
+r_renderscale -0.5
+vid_reload
+r_renderscale 2
+r_renderscale -0.2
+r_renderscale 0.2
+r_renderscale 0.5
+r_renderscale 0.1
+vid_reload
+r_wireframe 1
+r_wireframe 2
+r_wireframe 1
+r_renderscale -0.5
+r_wireframe 0
+gl_texturemode gl_nearest
+map bigbox
+vid_reload
+vid_reload
+gl_texturemode
+gl_texturemode gl_nearest
+map bigbox
+/map bigbox
+map bigbox
+map bigbox
+map bigbox
+map bigbox
+map bigbox
+connect localhost
+connect localhost
+connect localhost
+restart
+connect localhost
+connect localhost
+restart
+connect localhost
+connect localhost
+clear
+clear
+connect
+connect localhost
+connect localhost
+connect localhost
+connect localhost
+connect localhost
+connect localhost
+clear
+connect localhost
+r_showbboxes 1
+r_showbboxes 2
+r_showbboxes 1
+r_showbboxes 1
+r_showbboxes 2
+clear
+disconnect
+connect localhost
+connect localhost
+disconnect
+connect localhost
+disconnect
+connect localhost
+vid_reload
+r_showbboxes 0
+r_renderscale 1
+connect localhost
+disconnect
+connect localhost
+swap

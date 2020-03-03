@@ -1,0 +1,4 @@
+game Game
+name "Empty Game"
+basegame game
+disablehomedir 1

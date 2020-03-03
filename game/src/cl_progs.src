@@ -1,0 +1,12 @@
+../csprogs.dat
+cl_defs.qc
+sh_test.qc
+sh_customdefs.qc
+cl_customdefs.qc
+sui_sys.qc
+sh_generation.qc
+cl_generation.qc
+cl_menu.qc
+cl_player.qc
+cl_hud.qc
+cl_main.qc
