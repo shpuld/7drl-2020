@@ -166,3 +166,7 @@ vid_reload
 vid_reload
 restart
 disconnect
+restart
+restart
+restart
+clear

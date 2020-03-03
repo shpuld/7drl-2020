@@ -148,13 +148,13 @@ struct weapon {
 
 weapon weapon_list[] = {
 	{ "", "", 0, 0, 0, 0, 0, 0, 0, 0 },
-	{ "SMG", "models/smg.iqm", 10, 0.7, PT_SMALL_BULLET, 			1, 0.075, 1.2, 50, 0.9 },
-	{ "Micro SMG", "models/minismg.iqm", 8, 0.6, PT_SMALL_BULLET, 	1, 0.05, 0.8, 40, 1.0 },
-	{ "Combat Rifle", "models/ar.iqm", 14, 0.8, PT_MEDIUM_BULLET, 	1, 0.15, 1.2, 30, 0.8 },
-	{ "Bullpup", "models/bullpup.iqm", 16, 0.9, PT_MEDIUM_BULLET, 	1, 0.1, 1.4, 25, 0.85 },
-	{ "Pump Shotgun", "models/sg.iqm", 15, 0.5, PT_PELLET, 			6, 0.8, 1.5, 6, 0.85 },
-	{ "Auto Shotgun", "models/autosg.iqm", 15, 0.6, PT_PELLET, 		4, 0.2, 1.8, 6, 0.8 },
-	{ "DMR", "models/rifle.iqm", 45, 1.0, PT_BIG_BULLET, 			1, 0.6, 1.4, 5, 0.7 },
+	{ "SMG", "models/smg.iqm", 10, 0.7, PT_SMALL_BULLET, 			1, 0.075, 1.4, 50, 0.9 },
+	{ "Micro SMG", "models/minismg.iqm", 8, 0.6, PT_SMALL_BULLET, 	1, 0.05, 1.1, 40, 1.0 },
+	{ "Combat Rifle", "models/ar.iqm", 14, 0.75, PT_MEDIUM_BULLET, 	1, 0.15, 1.5, 30, 0.8 },
+	{ "Bullpup", "models/bullpup.iqm", 16, 0.85, PT_MEDIUM_BULLET, 	1, 0.1, 1.7, 25, 0.85 },
+	{ "Pump Shotgun", "models/sg.iqm", 15, 0.4, PT_PELLET, 			6, 0.9, 1.9, 6, 0.85 },
+	{ "Auto Shotgun", "models/autosg.iqm", 15, 0.5, PT_PELLET, 		4, 0.25, 2.2, 6, 0.8 },
+	{ "DMR", "models/rifle.iqm", 45, 0.9, PT_BIG_BULLET, 			1, 0.7, 1.8, 5, 0.7 },
 	{ "LMG", "models/lmg.iqm", 18, 0.75, PT_BIG_BULLET, 			1, 0.1, 3.5, 70, 0.6 }
 };
 

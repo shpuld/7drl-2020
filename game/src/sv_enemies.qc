@@ -87,10 +87,10 @@ void(entity attacker, vector dir, float amount) enemy_hurt =
 	if (attacker.classname == "player") self.enemy = attacker;
 	
 	self.frame = 1;
-	self.nextthink = time + 0.5;
+	self.nextthink = time + 0.5 * (amount / 25);
 	self.think = enemy_think;
 	self.flags (-) FL_ONGROUND;
-	self.velocity = dir * 300 + '0 0 50';
+	self.velocity = (dir * 5 + '0 0 5') * amount;
 };
 
 void(entity attacker, vector dir, float amount) enemy_die =
@@ -106,7 +106,7 @@ void() enemy_crawler =
 	setsize(self, '-16 -16 0', '16 16 56');
 	self.solid = SOLID_BBOX;
 	self.movetype = MOVETYPE_STEP;
-	self.health = 60;
+	self.health = 90;
 	self.takes_damage = TRUE;
 	// self.think = crawler_think;
 	// self.nextthink = time + 0.05;

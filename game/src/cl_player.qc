@@ -33,7 +33,7 @@ float() muzzleflash_predraw =
 	self.alpha -= frametime * 19;
 	self.frame1time += frametime * 1.25;
 	
-	add_light(self.origin + v_forward * 28, '0.8 0.5 0.2' * self.alpha, self.alpha * 24);
+	add_light(self.origin + v_forward * 30, '0.7 0.4 0.1' * self.alpha, self.alpha * 45);
 	
 	if (muzzleflash.alpha < 0)
 	{
@@ -120,7 +120,7 @@ float() player_predraw =
     self.oldframe = self.frame;
     
     vector pos = gettaginfo(self, gettagindex(self, "armhand.R"));
-    setorigin(gunmodel, pos);
+    setorigin(gunmodel, pos - v_right * 4);
     gunmodel.angles = vectoangles(-v_right, -v_forward);
     setmodel(gunmodel, weapon_list[inv_item_id[active_weapon]].model);
     addentity(gunmodel);
@@ -240,7 +240,8 @@ void() move_projectile =
 	if (self.owner)
 	{
 		traceline(self.origin, newpos, 0, self.owner);
-		if (trace_fraction < 1)
+		if (!trace_startsolid) self.origin = trace_endpos;
+		if (trace_fraction < 1 || trace_startsolid)
 		{
 			self.velocity = '0 0 0';
 			entity oldother = other;
@@ -248,7 +249,7 @@ void() move_projectile =
 			if (self.touch) self.touch();
 			other = oldother;
 		}
-		self.origin = trace_endpos;
+		
 	}
 	else
 	{
@@ -476,6 +477,9 @@ void(float slot) reload_with =
 {
 	// attack_finished is time until reload_fill, when mag gets filled
 	float item = inv_item_id[slot];
+	
+	if (inv_item_ammo[slot] >= max_ammo_for(slot)) return;
+
 	float reload_time_mod = 1;
 	
 	player.frame = FRAME_RELOAD;
@@ -484,8 +488,6 @@ void(float slot) reload_with =
 	item_effect * w_ef = &weapon_effects[inv_item_effect[slot]];
 	if (w_ef->effect1 == IEF_RELOADSPEED) reload_time_mod -= 0.1 * w_ef->level1; 
 	if (w_ef->effect2 == IEF_RELOADSPEED) reload_time_mod -= 0.1 * w_ef->level2; 
-	
-	if (inv_item_ammo[slot] >= max_ammo_for(slot)) return;
 	
 	reloading = TRUE;
 	reload_finished = time + weapon_list[item].reload_time * reload_time_mod;
@@ -586,22 +588,27 @@ void() melee_attack =
 void(float slot) drop_item =
 {
 	if (inv_item_id[slot] == 0) return;
-
+	
 	inv_item_ammo[slot] = 0;
 	inv_item_id[slot] = 0;
 	inv_item_effect[slot] = 0;
+	attack_finished = 0;
+	reload_finished = 0;
+	reloading = FALSE;
 	sendevent("dropitem", "f", slot);
 }
 
 void() swap_weapon =
 {
 	if (time < attack_finished) return;
+	// hack
+	self.velocity *= 0.3;
 	reloading = FALSE;
 	reload_finished = 0;
 	attack_finished = time + 0.1;
 	active_weapon = !active_weapon;
-	self.frame = FRAME_RELOAD;
-	self.frame1time = 0.5;
+	// self.frame = FRAME_RELOAD;
+	// self.frame1time = 0.5;
 }
 
 void() set_input_movevalues =
@@ -621,6 +628,11 @@ void() set_input_movevalues =
 	if (player.frame == FRAME_MELEE)
 	{
 		input_movevalues *= MELEE_SLOWDOWN;
+	}
+	
+	if (player.frame == FRAME_RELOAD)
+	{
+		input_movevalues *= 0.5;
 	}
 	
 	float weapon_speed = (weapon_list[inv_item_id[active_weapon]].move_speed);

@@ -47,7 +47,18 @@ void() update_glowents =
 {
 	for (int i = 1; i < MAX_GLOWENTS; i++)
 	{
-		if (glowents[i]) addentity(glowents[i]);
+		if (glowents[i])
+		{
+			float draw = PREDRAW_AUTOADD;
+			if (glowents[i].predraw)
+			{
+				entity oldself = self;
+				self = glowents[i];
+				draw = glowents[i].predraw();
+				self = oldself;
+			}
+			if (draw == PREDRAW_AUTOADD) addentity(glowents[i]);
+		}
 	}
 }
 
@@ -384,6 +395,8 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent =
 
 float() ring_predraw =
 {
+	if (light_pass) return PREDRAW_AUTOADD;
+
 	self.scale += frametime * 4;
 	self.frame1time += frametime * 1;
 	self.alpha -= frametime * 2;
@@ -392,6 +405,7 @@ float() ring_predraw =
 	{
 		remove(self);
 		remove_glowent(self);
+		return PREDRAW_NEXT;
 	}
 	
 	return PREDRAW_AUTOADD;
@@ -408,7 +422,6 @@ void(vector pos, vector color, float size) spawn_ring =
 	ring.scale = size;
 	ring.alpha = 0.5;
 	setmodel(ring, "models/ring.iqm");
-	print("ring spawned\n");
 }
 
 void() CSQC_Parse_Event =
