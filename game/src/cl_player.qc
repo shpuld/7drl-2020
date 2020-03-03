@@ -517,7 +517,6 @@ void(float slot) shoot_with =
 	
 	if (inv_item_ammo[slot] <= 0)
 	{
-		print("no ammo\n");
 		attack_finished = time + 0.5;
 		reload_with(slot);
 		return;
@@ -535,7 +534,7 @@ void(float slot) shoot_with =
 	camshake = muzzleflashsize * 0.75;
 		
 	add_muzzleflash(self, item, muzzleflashsize);
-	
+	sound(player, CHAN_WEAPON, strcat("sounds/", wep->sample), 1, 0.25, wep->soundspeed + crandom() * 2);
 	inv_item_ammo[slot] -= 1;
 	float speed = 1200 + (wep->damage * dmg_mod) * 90;
 	for (int i = 0; i < wep.proj_per_shot; i++)
