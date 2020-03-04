@@ -132,7 +132,8 @@ name_command bindlist[] =
 	{ "Reload", "reload" },
 	{ "Melee", "+jump" },
 	{ "Inventory", "toggleinventory" },
-	{ "Swap", "swap" }
+	{ "Swap", "swap" },
+	{ "Drop", "dropgun" }
 };
 
 void(string id, vector pos, vector size, string name, string command) bind_button =

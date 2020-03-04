@@ -201,6 +201,7 @@ void(float apiver, string enginename, float enginever) CSQC_Init =
 	registercommand("reload");
 	registercommand("swap");
 	registercommand("toggleinventory");
+	registercommand("dropgun");
 	
 	#ifdef CSQC_TEST
 	run_cl_unit_tests();
@@ -345,6 +346,10 @@ float(string cmd) CSQC_ConsoleCommand =
 			return TRUE;
 		case "toggleinventory":
 			inventory_active = !inventory_active;
+			return TRUE;
+		case "dropgun":
+			drop_item(active_weapon);
+			if (inv_item_id[!active_weapon]) swap_weapon();
 			return TRUE;
 		default:
 			return FALSE;
@@ -505,7 +510,7 @@ void(vector pos, vector vel, float proj_type, float owner_entnum, float target) 
 			setsize(proj, '0 0 0', '0 0 0');
 			proj.dmg = 15 + floor(random() * 6);
 			proj.nextthink = time + 1;
-			proj.velocity *= 700;
+			proj.velocity *= 650;
 			spawn_ring(proj.origin, '0.4 0.3 0.2', 0.7);
 			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQOther.wav", 0.8, 0.8);
 			break;

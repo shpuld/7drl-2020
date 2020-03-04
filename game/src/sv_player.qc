@@ -159,6 +159,7 @@ void() PlayerSpawn =
 	
 	msg_entity = self;
 	
+	/*
 	BeginEvent(EV_GIVE_AMMO);
 	MulticastByte(0);
 	MulticastByte(150);
@@ -173,6 +174,7 @@ void() PlayerSpawn =
 	MulticastByte(2);
 	MulticastByte(100);
 	multicast('0 0 0', MULTICAST_ONE_R);
+	*/
 	// self.gun = spawn();
 	// self_call(self.gun, test_weapon);
 };

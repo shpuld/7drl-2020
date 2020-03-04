@@ -91,13 +91,13 @@ void(float slot) CSEv_dropitem_f =
 {
 	entity item = self.inventory[slot];
 	self.inventory[slot] = world;
-	setorigin(item, self.origin + '0 0 50');
-	item.velocity = randomvec() * 100 + '0 0 100';
+	setorigin(item, self.origin + '0 0 40');
+	item.velocity = randomvec() * 20 + '0 0 50';
 	setmodel(item, item.model);
 	item.owner = world;
 	item.clearable = TRUE;
 	item.solid = SOLID_TRIGGER;
-	item.nextthink = time + 2;
+	item.nextthink = time + 1;
 	item.think = reactivate_item;
 };
 
@@ -105,13 +105,13 @@ void(float slot, float dropped_ammo, float dropped_mags) CSEv_dropitem_fff =
 {
 	entity item = self.inventory[slot];
 	self.inventory[slot] = world;
-	setorigin(item, self.origin + '0 0 50');
-	item.velocity = randomvec() * 100 + '0 0 100';
+	setorigin(item, self.origin + '0 0 40');
+	item.velocity = randomvec() * 20 + '0 0 50';
 	setmodel(item, item.model);
 	item.owner = world;
 	item.clearable = TRUE;
 	item.solid = SOLID_TRIGGER;
-	item.nextthink = time + 2;
+	item.nextthink = time + 1;
 	item.think = reactivate_item;
 	item.ammo_shells = dropped_ammo;
 	item.ammo_nails = dropped_mags;
@@ -216,7 +216,7 @@ void(entity attacker, vector dir, float amount) crate_die =
 	setorigin(drop, self.origin + '0 0 16');
 	drop.movetype = MOVETYPE_TOSS;
 	// drop.avelocity = [0, crandom() * 2500, 0];
-	drop.velocity = [crandom() * 30, crandom() * 30, 180];
+	drop.velocity = [crandom() * 25, crandom() * 25, 120];
 	BeginEvent(EV_BOX_BREAK);
 	MulticastVector(self.origin + '0 0 24');
 	multicast(self.origin, MULTICAST_PVS);
