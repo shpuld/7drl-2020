@@ -159,14 +159,14 @@ struct weapon {
 
 weapon weapon_list[] = {
 	{ "", "", 0, 0, 0, 0, 0, 0, 0, 0, "" },
-	{ "SMG", "models/smg.iqm", 10, 0.7, PT_SMALL_BULLET, 			1, 0.075, 1.5, 40, 0.9, "ShotSMGOther.wav", 100 },
-	{ "Micro SMG", "models/minismg.iqm", 8, 0.6, PT_SMALL_BULLET, 	1, 0.05, 1.1, 35, 1.0, "ShotSMG.wav", 100 },
-	{ "Combat Rifle", "models/ar.iqm", 14, 0.75, PT_MEDIUM_BULLET, 	1, 0.15, 1.8, 30, 0.8, "ShotSMGEQ.wav", 110 },
-	{ "Bullpup", "models/bullpup.iqm", 16, 0.85, PT_MEDIUM_BULLET, 	1, 0.1, 2.0, 25, 0.85, "rifle.wav", 100 },
-	{ "Pump Shotgun", "models/sg.iqm", 15, 0.4, PT_PELLET, 			6, 0.8, 1.8, 6, 0.9, "shotgun.wav", 100 },
-	{ "Auto Shotgun", "models/autosg.iqm", 15, 0.5, PT_PELLET, 		4, 0.2, 2.3, 6, 0.8, "shotgun.wav", 110 },
-	{ "DMR", "models/rifle.iqm", 45, 0.9, PT_BIG_BULLET, 			1, 0.7, 2.0, 5, 0.75, "bigrifle.wav", 100 },
-	{ "LMG", "models/lmg.iqm", 18, 0.75, PT_BIG_BULLET, 			1, 0.1, 3.5, 70, 0.7, "ShotLMGEQ.wav", 100 }
+	{ "SMG", "models/smg.iqm", 10, 0.7, PT_SMALL_BULLET, 			1, 0.075, 1.5, 40, 0.9, "sounds/ShotSMGOther.wav", 100 },
+	{ "Micro SMG", "models/minismg.iqm", 8, 0.6, PT_SMALL_BULLET, 	1, 0.05, 1.1, 35, 1.0, "sounds/ShotSMG.wav", 100 },
+	{ "Combat Rifle", "models/ar.iqm", 14, 0.75, PT_MEDIUM_BULLET, 	1, 0.15, 1.8, 30, 0.8, "sounds/ShotSMGEQ.wav", 110 },
+	{ "Bullpup", "models/bullpup.iqm", 16, 0.85, PT_MEDIUM_BULLET, 	1, 0.1, 2.0, 25, 0.85, "sounds/rifle.wav", 100 },
+	{ "Pump Shotgun", "models/sg.iqm", 15, 0.4, PT_PELLET, 			6, 0.8, 1.8, 6, 0.9, "sounds/shotgun.wav", 100 },
+	{ "Auto Shotgun", "models/autosg.iqm", 15, 0.5, PT_PELLET, 		4, 0.2, 2.3, 6, 0.8, "sounds/shotgun.wav", 110 },
+	{ "DMR", "models/rifle.iqm", 45, 0.9, PT_BIG_BULLET, 			1, 0.7, 2.0, 5, 0.75, "sounds/bigrifle.wav", 100 },
+	{ "LMG", "models/lmg.iqm", 18, 0.75, PT_BIG_BULLET, 			1, 0.1, 3.5, 70, 0.7, "sounds/ShotLMGEQ.wav", 100 }
 };
 
 void() precache_guns =

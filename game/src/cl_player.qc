@@ -552,7 +552,7 @@ void(float slot) shoot_with =
 	camshake = muzzleflashsize * 0.75;
 		
 	add_muzzleflash(self, item, muzzleflashsize);
-	sound(player, CHAN_WEAPON, strcat("sounds/", wep->sample), 1, 0.25, wep->soundspeed + crandom() * 2);
+	sound(player, CHAN_WEAPON, wep->sample, 1, 0.25, wep->soundspeed + crandom() * 2);
 	inv_item_ammo[slot] -= 1;
 	float speed = 1200 + (wep->damage * dmg_mod) * 90;
 	for (int i = 0; i < wep.proj_per_shot; i++)
