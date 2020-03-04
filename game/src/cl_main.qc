@@ -556,6 +556,7 @@ void() CSQC_Parse_Event =
 			}
 			break;
 		case EV_SET_INVENTORY:
+			sound(self, CHAN_AUTO, "sounds/reload2.wav", 0.5, 0);
 			int index = readbyte();
 			float id = readbyte();
 			inv_item_id[index] = id;
@@ -572,6 +573,7 @@ void() CSQC_Parse_Event =
 			}
 			break;
 		case EV_GIVE_AMMO:
+			sound(self, CHAN_AUTO, "sounds/reload2.wav", 0.5, 0);
 			type = readbyte();
 			int amount = readbyte();
 			weapon_mags[type] += amount;

@@ -211,6 +211,7 @@ void() precache_everything =
 	
 	precache_sound("sounds/t75.wav");
 	precache_sound("sounds/reload1.wav");
+	precache_sound("sounds/reload2.wav");
 	precache_sound("sounds/reload3.wav");
 	precache_sound("sounds/ShotSMGEQOther.wav");
 	
