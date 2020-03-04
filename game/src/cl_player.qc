@@ -477,7 +477,7 @@ float(float slot) max_ammo_for =
 
 void(float slot) reload_fill =
 {
-	sound(player, CHAN_ITEM, "sounds/reload3.wav", 1, 0.2);
+	sound(player, CHAN_ITEM, "sounds/reloadendperfect.wav", 1, 0.2);
 	float item = inv_item_id[slot];
 
 	float leftinmag = inv_item_ammo[slot];
@@ -499,7 +499,7 @@ void(float slot) reload_with =
 
 	float reload_time_mod = 1;
 	
-	sound(player, CHAN_ITEM, "sounds/reload1.wav", 1, 0.2);
+	sound(player, CHAN_ITEM, "sounds/reloadbegin2.wav", 1, 0.2);
 	player.frame = FRAME_RELOAD;
 	player.frame1time = 0;
 	
@@ -575,27 +575,28 @@ void() melee_hit =
 	makevectors(angles);
 	entity e = findradius(player.origin, 80);
 	float meleedmg = 25;
-	print("Melee\n");
-	
+	float hitsomething = FALSE;
 	while (e)
 	{
 		vector to_ent = e.origin - player.origin;
 		if (normalize(to_ent) * v_forward > 0.6 && e.is_enemy)
 		{
 			sendevent("meleehit", "vvv", 0.5 * (e.origin + player.origin), normalize(to_ent), [e.entnum, meleedmg]);
+			hitsomething = TRUE;
 		}
 		
 		e = e.chain;
 	}
+	if (hitsomething) sound(player, CHAN_AUTO, "sounds/meleehit.wav", 1.0, 0.2);
 }
 
 void() melee_attack =
 {
-	player.nextthink = time + 0.3;
+	player.nextthink = time + 0.25;
 	player.think = melee_hit;
 	player.frame = FRAME_MELEE;
 	player.frame1time = 0;
-	
+	sound(player, CHAN_AUTO, "sounds/meleeswing.wav", 0.7, 0.2);
 	if (reloading)
 	{
 		reloading = FALSE;

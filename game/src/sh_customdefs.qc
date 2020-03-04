@@ -210,9 +210,15 @@ void() precache_everything =
 	precache_model("models/melee_proj.iqm");
 	
 	precache_sound("sounds/t75.wav");
+	precache_sound("sounds/reloadbegin.wav");
+	precache_sound("sounds/reloadbegin2.wav");
+	precache_sound("sounds/reloadend.wav");
+	precache_sound("sounds/reloadendperfect.wav");
 	precache_sound("sounds/reload1.wav");
 	precache_sound("sounds/reload2.wav");
 	precache_sound("sounds/reload3.wav");
+	precache_sound("sounds/meleeswing.wav");
+	precache_sound("sounds/meleehit.wav");
 	precache_sound("sounds/ShotSMGEQOther.wav");
 	
 	particleeffectnum("weapons.explosion");
