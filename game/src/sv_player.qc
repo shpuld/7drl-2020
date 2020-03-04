@@ -65,49 +65,48 @@ void() PlayerPreThink =
 			closest_usable_dist = sqdist;
 			closest_usable = e;
 		}
-		
-		if (closest_usable_dist < 5000)
+	}
+	if (closest_usable_dist < 5000)
+	{
+		if (closest_usable.item_id)
 		{
-			if (closest_usable.item_id)
-			{
-				self.item_id = closest_usable.item_id;
-				self.item_effect = closest_usable.item_effect;
-				self.ammo_shells = closest_usable.ammo_shells;
-				self.ammo_nails = closest_usable.ammo_nails;
-				
-				if (
-					closest_usable.ammo_nails && 
-					(closest_usable.item_id == self.inventory[0].item_id || closest_usable.item_id == self.inventory[1].item_id)
-				) {
-					// take spare mags
-					msg_entity = self;
-					BeginEvent(EV_GIVE_AMMO);
-					MulticastByte(closest_usable.item_id);
-					MulticastByte(closest_usable.ammo_nails);
-					multicast(self.origin, MULTICAST_ONE_R);
-					closest_usable.ammo_nails = 0;
-				}
-			}
-			if (self.button3 && self.use_released)
-			{
-				entity oldself = self;
-				entity oldother = other;
-				other = self;
-				self = closest_usable;
-				self.touch();
-				other = oldother;
-				self = oldself;
-				
-				self.use_released = FALSE;
+			self.item_id = closest_usable.item_id;
+			self.item_effect = closest_usable.item_effect;
+			self.ammo_shells = closest_usable.ammo_shells;
+			self.ammo_nails = closest_usable.ammo_nails;
+			
+			if (
+				closest_usable.ammo_nails && 
+				(closest_usable.item_id == self.inventory[0].item_id || closest_usable.item_id == self.inventory[1].item_id)
+			) {
+				// take spare mags
+				msg_entity = self;
+				BeginEvent(EV_GIVE_AMMO);
+				MulticastByte(closest_usable.item_id);
+				MulticastByte(closest_usable.ammo_nails);
+				multicast(self.origin, MULTICAST_ONE_R);
+				closest_usable.ammo_nails = 0;
 			}
 		}
-		else
+		if (self.button3 && self.use_released)
 		{
-			self.item_id = 0;
-			self.item_effect = 0;
-			self.ammo_shells = 0;
-			self.ammo_nails = 0;
+			entity oldself = self;
+			entity oldother = other;
+			other = self;
+			self = closest_usable;
+			self.touch();
+			other = oldother;
+			self = oldself;
+			
+			self.use_released = FALSE;
 		}
+	}
+	else
+	{
+		self.item_id = 0;
+		self.item_effect = 0;
+		self.ammo_shells = 0;
+		self.ammo_nails = 0;
 	}
 	if (!self.button3) self.use_released = TRUE;
 

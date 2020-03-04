@@ -562,6 +562,7 @@ void(float slot) shoot_with =
 		e.touch = test_projectile_touch;
 		e.owner = self;
 		e.dmg = ceil(wep->damage * dmg_mod);
+		send_projectile(e);
 		attack_finished = time + wep->fire_rate * firerate_mod;
 	}
 	
