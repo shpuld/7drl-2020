@@ -159,6 +159,9 @@ float(float isnew) enemylisten =
 	setsize(self, '-20 -20 0', '20 20 50');
 	self.is_enemy = TRUE;
 	
+	if (self.solid != SOLID_NOT)
+		add_light(self.origin + '0 0 48', '0.2 0.1 0.1', 7);
+	
 	return TRUE;
 };
 
