@@ -229,7 +229,13 @@ void() reset_map =
 	// Things that can't be cleared:
 	// - players
 	// - tiles (just change them instead)
-	for (entity e = findfloat(world, clearable, TRUE); e; e = findfloat(e, clearable, TRUE)) remove(e);
+	for (entity e = findfloat(world, clearable, TRUE); e; e = findfloat(e, clearable, TRUE))
+	{
+		if (e.player_chain_next || e.player_chain_prev)
+			usable_chain_remove(e);
+
+		remove(e);
+	}
 
 	generate_map(&test_meta_map);
 	fill_map(&test_tile_map, &test_meta_map, test_tile_set);

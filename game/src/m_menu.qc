@@ -123,11 +123,16 @@ struct name_command {
 
 name_command bindlist[] = 
 {
-	{ "Forward", "+forward" },
-	{ "Back", "+back" },
+	{ "Up", "+forward" },
+	{ "Down", "+back" },
 	{ "Left", "+moveleft" },
 	{ "Right", "+moveright" },
-	{ "Jump", "+jump" }
+	{ "Shoot", "+attack" },
+	{ "Use", "+button3" },
+	{ "Reload", "reload" },
+	{ "Melee", "+jump" },
+	{ "Inventory", "toggleinventory" },
+	{ "Swap", "swap" }
 };
 
 void(string id, vector pos, vector size, string name, string command) bind_button =

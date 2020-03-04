@@ -484,7 +484,8 @@ void(float slot) reload_fill =
 	reloading = FALSE;
 	
 	inv_item_ammo[slot] = max_ammo_for(slot);
-	reload_finished = time + 0.3;
+	weapon_mags[item] -= 1;
+	reload_finished = time + 0.2;
 };
 
 void(float slot) reload_with =
@@ -492,6 +493,7 @@ void(float slot) reload_with =
 	// attack_finished is time until reload_fill, when mag gets filled
 	float item = inv_item_id[slot];
 	
+	if (weapon_mags[item] <= 0) return;
 	if (inv_item_ammo[slot] >= max_ammo_for(slot)) return;
 	if (time < reload_finished) return;
 
@@ -606,6 +608,21 @@ void(float slot) drop_item =
 {
 	if (inv_item_id[slot] == 0) return;
 	
+	// handle dropping weapons differently because they have ammo and spare mags
+	if (slot < 2)
+	{
+		float item = inv_item_id[slot];
+		float dropping_ammo = inv_item_ammo[slot];
+		// don't drop spare mags if the other gun uses the same ammo
+		float dropping_mags = inv_item_id[!slot] == item ? 0 : weapon_mags[item];
+		weapon_mags[item] = dropping_mags ? 0 : weapon_mags[item];
+		sendevent("dropitem", "fff", slot, dropping_ammo, dropping_mags);
+	}
+	else
+	{
+		sendevent("dropitem", "f", slot);
+	}
+	
 	inv_item_ammo[slot] = 0;
 	inv_item_id[slot] = 0;
 	inv_item_effect[slot] = 0;
@@ -614,7 +631,7 @@ void(float slot) drop_item =
 	reloading = FALSE;
 	self.frame = FRAME_SWAP;
 	self.frame1time = 0;
-	sendevent("dropitem", "f", slot);
+	
 }
 
 void() swap_weapon =

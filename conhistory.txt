@@ -230,3 +230,25 @@ vid_reload
 restat
 restart
 quit
+vid_reload
+clear
+vid_reload
+vid_reload
+cl_netfps 30
+sv_minping 250
+restart
+sv_minping 100
+vid_reload
+sv_minping 0
+restart
+restart
+restart
+restart
+restart
+snd_restart
+music 1
+music 0
+/musicvolume 
+music 1
+restart
+music 1

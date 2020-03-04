@@ -93,3 +93,32 @@ void(entity removing) player_chain_remove =
 	removing.player_chain_prev = world;
 };
 
+entity usable_chain_head;
+
+// Put an entity as the first of the linked list
+void(entity adding) usable_chain_add =
+{
+	if (adding.player_chain_prev || adding.player_chain_next || (adding == player_chain_head && !adding.player_chain_next)) 
+	{
+		print("Trying to adding an entity into player chain while it already is in chain!\n");
+		return;
+	}
+	if (usable_chain_head) usable_chain_head.player_chain_prev = adding;
+	adding.player_chain_next = usable_chain_head;
+	usable_chain_head = adding;
+};
+
+// Remove entity from linked list
+void(entity removing) usable_chain_remove =
+{
+	if (removing == usable_chain_head)
+	{
+		usable_chain_head = removing.player_chain_next;
+	}
+	
+	if (removing.player_chain_next) removing.player_chain_next.player_chain_prev = removing.player_chain_prev;
+	if (removing.player_chain_prev) removing.player_chain_prev.player_chain_next = removing.player_chain_next;
+	removing.player_chain_next = world;
+	removing.player_chain_prev = world;
+};
+

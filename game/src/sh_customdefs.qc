@@ -1,5 +1,8 @@
 //shared definitions
 
+const float STAT_ITEM_ID = 50;
+const float STAT_ITEM_EFFECT = 51;
+
 const float EV_SPAWN_PROJECTILE = 10;
 const float EV_PROJECTILE_HIT = 11;
 const float EV_SET_INVENTORY = 12;

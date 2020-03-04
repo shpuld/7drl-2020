@@ -56,6 +56,8 @@ float inv_item_id[INV_SIZE];
 float inv_item_effect[INV_SIZE];
 float inv_item_ammo[INV_SIZE];
 
+float weapon_mags[weapon_list.length];
+
 float ammo_bullets;
 float ammo_shells;
 float ammo_cells;

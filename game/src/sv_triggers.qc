@@ -58,6 +58,7 @@ float(entity player, entity item) put_item_in_inventory =
 		MulticastByte(item.item_id);
 		MulticastByte(item.item_effect);
 		MulticastByte(item.ammo_shells);
+		MulticastByte(item.ammo_nails);
 		multicast('0 0 0', MULTICAST_ONE_R);
 		
 		player.inventory[i] = item;
@@ -66,6 +67,7 @@ float(entity player, entity item) put_item_in_inventory =
 		item.owner = player;
 		item.touch = sub_noop;
 		item.clearable = FALSE;
+		usable_chain_remove(item);
 		return TRUE;
 	}
 	return FALSE;
@@ -81,7 +83,8 @@ void() item_touch =
 void() reactivate_item =
 {
 	self.touch = item_touch;
-	self.flags = FL_FINDABLE_NONSOLID;
+	// self.flags = FL_FINDABLE_NONSOLID;
+	usable_chain_add(self);
 };
 
 void(float slot) CSEv_dropitem_f =
@@ -98,6 +101,21 @@ void(float slot) CSEv_dropitem_f =
 	item.think = reactivate_item;
 };
 
+void(float slot, float dropped_ammo, float dropped_mags) CSEv_dropitem_fff =
+{
+	entity item = self.inventory[slot];
+	self.inventory[slot] = world;
+	setorigin(item, self.origin + '0 0 50');
+	item.velocity = randomvec() * 100 + '0 0 100';
+	setmodel(item, item.model);
+	item.owner = world;
+	item.clearable = TRUE;
+	item.solid = SOLID_TRIGGER;
+	item.nextthink = time + 2;
+	item.think = reactivate_item;
+	item.ammo_shells = dropped_ammo;
+	item.ammo_nails = dropped_mags;
+};
 
 
 void() item_fastreload = 
@@ -169,12 +187,14 @@ void() item_weapon =
 {
 	self.type = IT_WEAPON;
 	float i = floor(random() * (weapon_list.length - 1) + 1);
-	printf("spawned %f\n", i);
 	self.item_id = i;
 	setmodel(self, weapon_list[i].model);
 	self.clearable = TRUE;
 	self.item_effect = floor(weapon_effects.length * random());
+	// current mag
 	self.ammo_shells = weapon_list[i].mag_size * (random() * 0.5 + 0.5);
+	// spare mags
+	self.ammo_nails = floor(1 + random() * 2.5);
 	self.angles = '0 0 -90';
 }
 
@@ -183,18 +203,10 @@ void() test_item =
 	setmodel(self, "models/bomb.iqm");
 	self.solid = SOLID_TRIGGER;
 	self.touch = item_touch;
-	self.flags = FL_FINDABLE_NONSOLID;
+	// self.flags = FL_FINDABLE_NONSOLID;
 	item_weapon();
-	/*float type = random() * 8;
-	if (type < 1) item_smg();
-	else if (type < 2) item_ar();
-	else if (type < 3) item_fastreload();
-	else if (type < 4) item_sharpshooter();
-	else if (type < 5) item_shells();
-	else if (type < 6) item_bullets();
-	else if (type < 7) item_rifle();
-	else item_sg();*/
 	setsize(self, '-16 -16 0', '16 16 32');
+	usable_chain_add(self);
 };
 
 void(entity attacker, vector dir, float amount) crate_die =
@@ -238,5 +250,6 @@ void() misc_exit =
 	setsize(self, '-32 -32 0', '32 32 64');
 	self.touch = exit_touch;
 	self.solid = SOLID_TRIGGER;
-	self.flags = FL_FINDABLE_NONSOLID;
+	// self.flags = FL_FINDABLE_NONSOLID;
+	usable_chain_add(self);
 };

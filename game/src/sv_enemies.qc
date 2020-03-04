@@ -60,7 +60,6 @@ void() enemy_attack =
 			break;
 	}
 	MulticastEnt(self);
-	printf("dot %f\n", v_forward * normalize(to_player));
 	if (v_forward * normalize(to_player) > 0.94)
 		MulticastEnt(self.enemy);
 	else

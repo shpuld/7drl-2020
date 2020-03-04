@@ -11,7 +11,7 @@ void() StartFrame =
 {
 };
 
-#define SSQC_TEST
+// #define SSQC_TEST
 void() run_sv_unit_tests =
 {
 	print("Running SSQC unit tests...\n");
@@ -30,6 +30,9 @@ void() worldspawn =
 		print("big box\n");
 		init_test_map();
 	}
+	
+	clientstat(STAT_ITEM_ID, EV_FLOAT, item_id);
+	clientstat(STAT_ITEM_EFFECT, EV_FLOAT, item_effect);
 	
 	#ifdef SSQC_TEST
 	run_sv_unit_tests();

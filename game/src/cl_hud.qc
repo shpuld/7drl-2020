@@ -7,11 +7,33 @@ void() draw_inventory =
 	if (inventory_active) return;
 	
 	float ypos = 240;
-	for (int i = 0; i < INV_SIZE; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		if (i == active_weapon) drawfill([0, ypos], [128, 16], '1 1 1', 0.1, 1);
-		drawstring([0, ypos], sprintf("%s %s, %.0f", weapon_effects[inv_item_effect[i]].name, weapon_list[inv_item_id[i]].name, inv_item_ammo[i]), [8, 8], '1 1 1', 1, 0); 
-		ypos += 16;
+		drawstring([0, ypos], sprintf("%s %s", weapon_effects[inv_item_effect[i]].name, weapon_list[inv_item_id[i]].name), [8, 8], '1 1 1', 1, 0); 
+		ypos += 8;
+		drawstring([0, ypos], sprintf("%.0f/%.0f - %.0f", inv_item_ammo[i], max_ammo_for(i), weapon_mags[inv_item_id[i]]), [8, 8], '1 1 1', 1, 0); 
+		ypos += 8;
+	}
+	
+	float pu_item_id = getstatf(STAT_ITEM_ID);
+	float pu_item_effect = getstatf(STAT_ITEM_EFFECT);
+	float pu_ammo = getstatf(STAT_SHELLS);
+	float pu_mags = getstatf(STAT_NAILS);
+	
+	if (pu_item_id)
+	{
+		string strings[4];
+		strings[0] = "Press USE to pick up";
+		strings[1] = pu_item_effect ? sprintf("%s %s", weapon_effects[pu_item_effect].name, weapon_list[pu_item_id].name) : weapon_list[pu_item_id].name;
+		strings[2] = strpad(16, weapon_stats_string(pu_item_effect, 1));
+		strings[3] = strpad(16, weapon_stats_string(pu_item_effect, 2));
+
+		for (int i = 0; i < strings.length; i++)
+		{
+			float ofs = i > 0 ? i*8 + 8 : 0;
+			drawstring([g_width/2 - 4*strlen(strings[i]), g_height - 100 + ofs], strings[i], '8 8 0', '1 1 1', 0.8, 0);
+		}
 	}
 };
 
@@ -24,7 +46,7 @@ void() draw_ammo =
 
 void() draw_health =
 {
-	string hpstr = sprintf("%.0f", getstatf(STAT_HEALTH));
+	string hpstr = sprintf("+%.0f/100", getstatf(STAT_HEALTH));
 	drawstring([g_width - strlen(hpstr)*16, g_height - 16], hpstr, [16, 16], '1 1 1', 1, 0);
 };
 
@@ -51,7 +73,7 @@ void() draw_dmg =
 void() draw_hud =
 {
 	draw_inventory();
-	draw_ammo();
+	// draw_ammo();
 	draw_health();
 	draw_dmg();
 };

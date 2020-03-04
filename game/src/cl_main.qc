@@ -552,9 +552,19 @@ void() CSQC_Parse_Event =
 			break;
 		case EV_SET_INVENTORY:
 			int index = readbyte();
-			inv_item_id[index] = readbyte();
+			float id = readbyte();
+			inv_item_id[index] = id;
 			inv_item_effect[index] = readbyte();
 			inv_item_ammo[index] = readbyte();
+			float mags = readbyte();
+			if (index < 2)
+			{
+				// shared ammo between the guns
+				if (inv_item_id[!index] == id)
+					weapon_mags[id] += mags;
+				else
+					weapon_mags[id] = mags;
+			}
 			break;
 		case EV_GIVE_AMMO:
 			type = readbyte();
@@ -578,7 +588,6 @@ void() CSQC_Parse_Event =
 			target = readshort();
 			pos = readvector();
 			vel = readvector();
-			printf("targeting %.0f\n", target);
 			spawn_enemy_projectile(pos, vel, type, owner, target);
 			break;
 		default:

@@ -48,10 +48,56 @@ vector() get_spawn_point =
 	return spawnpoint.origin + '0 0 1';
 };
 
+.float use_released;
 void() PlayerPreThink =
 {	
 	CheckImpulses();
 	
+	float closest_usable_dist = 5000;
+	entity closest_usable = world;
+	for (entity e = usable_chain_head; e; e = e.player_chain_next)
+	{
+		vector diff = [e.origin.x - self.origin.x, e.origin.y - self.origin.y];
+		float sqdist = diff.x*diff.x + diff.y*diff.y;
+		
+		if (sqdist < closest_usable_dist)
+		{
+			closest_usable_dist = sqdist;
+			closest_usable = e;
+		}
+		
+		if (closest_usable_dist < 5000)
+		{
+			if (closest_usable.item_id)
+			{
+				self.item_id = closest_usable.item_id;
+				self.item_effect = closest_usable.item_effect;
+				self.ammo_shells = closest_usable.ammo_shells;
+				self.ammo_nails = closest_usable.ammo_nails;
+			}
+			if (self.button3 && self.use_released)
+			{
+				entity oldself = self;
+				entity oldother = other;
+				other = self;
+				self = closest_usable;
+				self.touch();
+				other = oldother;
+				self = oldself;
+				
+				self.use_released = FALSE;
+			}
+		}
+		else
+		{
+			self.item_id = 0;
+			self.item_effect = 0;
+			self.ammo_shells = 0;
+			self.ammo_nails = 0;
+		}
+	}
+	if (!self.button3) self.use_released = TRUE;
+
 	// entity gun = self.inventory[self.equipped_slot];
 	if (self.button0)
 	{
