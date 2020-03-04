@@ -74,6 +74,17 @@ void() PlayerPreThink =
 				self.item_effect = closest_usable.item_effect;
 				self.ammo_shells = closest_usable.ammo_shells;
 				self.ammo_nails = closest_usable.ammo_nails;
+				
+				if (closest_usable.item_id == self.inventory[0].item_id || closest_usable.item_id == self.inventory[1].item_id)
+				{
+					// take spare mags
+					msg_entity = self;
+					BeginEvent(EV_GIVE_AMMO);
+					MulticastByte(closest_usable.item_id);
+					MulticastByte(closest_usable.ammo_nails);
+					multicast(self.origin, MULTICAST_ONE_R);
+					closest_usable.ammo_nails = 0;
+				}
 			}
 			if (self.button3 && self.use_released)
 			{

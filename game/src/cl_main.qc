@@ -512,7 +512,7 @@ void(vector pos, vector vel, float proj_type, float owner_entnum, float target) 
 			proj.nextthink = time + 1;
 			proj.velocity *= 650;
 			spawn_ring(proj.origin, '0.4 0.3 0.2', 0.7);
-			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQOther.wav", 0.8, 0.8);
+			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQOther.wav", 0.9, 0.8);
 			break;
 		default:
 			setmodel(proj, "models/ring.iqm");
@@ -574,9 +574,7 @@ void() CSQC_Parse_Event =
 		case EV_GIVE_AMMO:
 			type = readbyte();
 			int amount = readbyte();
-			if (type == 0) ammo_bullets += amount;
-			if (type == 1) ammo_shells += amount;
-			if (type == 2) ammo_cells += amount;
+			weapon_mags[type] += amount;
 			break;
 		case EV_BOX_BREAK:
 			pos = readvector();
