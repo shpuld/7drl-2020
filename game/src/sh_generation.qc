@@ -623,10 +623,34 @@ void(tile_map * map, metatile * meta, vector pos) fill_meta =
 			// TODO: make meta editor already display it flipped to keep them sane
 			realpos = start_pos + [x, META_H - y - 1];
 			//if (random() > 0.2)
-			map->tiles[map_pos_to_index(realpos)] = meta->tiles[y * META_H + x];
-			map->content[map_pos_to_index(realpos)] = meta->content[y * META_H + x];
+			// Make sure borders are closed even if meta says they're open
+			if (realpos_x == 0 || realpos_x == MAP_W - 1 || realpos_y == 0 || realpos_y == MAP_H - 1)
+			{
+				map->tiles[map_pos_to_index(realpos)] = TILE_WALL;
+				map->content[map_pos_to_index(realpos)] = TC_EMPTY;
+			}
+			else
+			{
+				map->tiles[map_pos_to_index(realpos)] = meta->tiles[y * META_H + x];
+				map->content[map_pos_to_index(realpos)] = meta->content[y * META_H + x];
+			}
 			//else
 			//	map->tiles[map_pos_to_index(realpos)] = rint(random());
+		}
+	}
+};
+
+void(tile_map * map, vector pos) clear_meta =
+{
+	vector start_pos = [pos_x * META_W, pos_y * META_H];
+	vector realpos;
+	for (int y = 0; y < META_H; y++)
+	{
+		for (int x = 0; x < META_W; x++)
+		{
+			realpos = start_pos + [x, META_H - y - 1];
+			map->tiles[map_pos_to_index(realpos)] = TILE_WALL;
+			map->content[map_pos_to_index(realpos)] = TC_EMPTY;
 		}
 	}
 };
@@ -647,6 +671,10 @@ void(tile_map * map, meta_map * metamap, tile_set * tileset) fill_map =
 				int metaindex = floor(random() * cat->num_entries);
 				metatile * meta = &(cat->variations[metaindex]);
 				fill_meta(map, meta, [x, y]);
+			}
+			else
+			{
+				clear_meta(map, [x, y]);
 			}
 		}
 	}

@@ -5,7 +5,7 @@ const float FL_JUMPRELEASED = 4096;
 vector test_spawnpoint;
 
 .entity inventory[INV_SIZE];
-.float type;
+
 .float takes_damage;
 .float attack_finished;
 

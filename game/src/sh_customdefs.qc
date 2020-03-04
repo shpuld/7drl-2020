@@ -6,6 +6,7 @@ const float EV_SET_INVENTORY = 12;
 const float EV_GIVE_AMMO = 13;
 const float EV_BOX_BREAK = 14;
 const float EV_CLEAR_MAP = 15;
+const float EV_ENEMY_PROJECTILE = 16;
 
 const int INV_SIZE = 6;
 const int INV_SLOT_WEAPON1 = 0;
@@ -16,10 +17,15 @@ const int INV_SLOT_TRINKET2 = 4;
 const int INV_SLOT_TRINKET3 = 5;
 
 .float clearable;
+.float type;
 
 // Projectile Types
 enum {
 	PT_SMALL_BULLET, PT_MEDIUM_BULLET, PT_BIG_BULLET, PT_PELLET, PT_PLASMA, PT_LASER
+};
+
+enum {
+	EPT_MELEE, EPT_BULLET
 };
 
 // Item Types
@@ -152,12 +158,12 @@ weapon weapon_list[] = {
 	{ "", "", 0, 0, 0, 0, 0, 0, 0, 0, "" },
 	{ "SMG", "models/smg.iqm", 10, 0.7, PT_SMALL_BULLET, 			1, 0.075, 1.5, 40, 0.9, "ShotSMGOther.wav", 100 },
 	{ "Micro SMG", "models/minismg.iqm", 8, 0.6, PT_SMALL_BULLET, 	1, 0.05, 1.1, 35, 1.0, "ShotSMG.wav", 100 },
-	{ "Combat Rifle", "models/ar.iqm", 14, 0.75, PT_MEDIUM_BULLET, 	1, 0.15, 1.8, 30, 0.8, "ShotSMGEQ.wav", 100 },
+	{ "Combat Rifle", "models/ar.iqm", 14, 0.75, PT_MEDIUM_BULLET, 	1, 0.15, 1.8, 30, 0.8, "ShotSMGEQ.wav", 110 },
 	{ "Bullpup", "models/bullpup.iqm", 16, 0.85, PT_MEDIUM_BULLET, 	1, 0.1, 2.0, 25, 0.85, "rifle.wav", 100 },
 	{ "Pump Shotgun", "models/sg.iqm", 15, 0.4, PT_PELLET, 			6, 0.8, 1.8, 6, 0.9, "shotgun.wav", 100 },
 	{ "Auto Shotgun", "models/autosg.iqm", 15, 0.5, PT_PELLET, 		4, 0.2, 2.3, 6, 0.8, "shotgun.wav", 110 },
 	{ "DMR", "models/rifle.iqm", 45, 0.9, PT_BIG_BULLET, 			1, 0.7, 2.0, 5, 0.75, "bigrifle.wav", 100 },
-	{ "LMG", "models/lmg.iqm", 18, 0.75, PT_BIG_BULLET, 			1, 0.1, 3.5, 70, 0.7, "ShotLMGEQ.wav", 105 }
+	{ "LMG", "models/lmg.iqm", 18, 0.75, PT_BIG_BULLET, 			1, 0.1, 3.5, 70, 0.7, "ShotLMGEQ.wav", 100 }
 };
 
 void() precache_guns =
@@ -196,8 +202,14 @@ void() precache_everything =
 	precache_model("models/ladderdown.iqm");
 	precache_model("models/ring.iqm");
 	precache_model("models/muzzleflash.iqm");
+	precache_model("models/zombiegunner.iqm");
+	precache_model("models/zombieberserker.iqm");
+	precache_model("models/melee_proj.iqm");
 	
 	precache_sound("sounds/t75.wav");
+	precache_sound("sounds/reload1.wav");
+	precache_sound("sounds/reload3.wav");
+	precache_sound("sounds/ShotSMGEQOther.wav");
 	
 	particleeffectnum("weapons.explosion");
 	
@@ -366,74 +378,3 @@ void(entity e, void() fn) self_call =
 	self = oself;
 };
 
-/*
-.float attack_finished;
-.void() primary_fire;
-.void() primary_fire_cb;
-.void() secondary_fire;
-.void() secondary_fire_cb;
-.void() reload;
-.void() reload_cb;
-
-void() t75_explode =
-{
-	pointparticles(particleeffectnum("weapons.explosion"), self.origin + '0 0 32', '0 0 1');
-	sound(self, CHAN_AUTO, "sounds/t75.wav", 1, 0.5);
-	remove(self);
-};
-
-void(entity proj) t75_projectile =
-{
-	setmodel(proj, "models/bomb.iqm");
-	proj.movetype = MOVETYPE_TOSS;
-	proj.nextthink = time + 3;
-	proj.think = t75_explode;
-};
-
-void() test_pf =
-{
-	if (time < self.attack_finished) return;
-	entity mis = spawn();
-	t75_projectile(mis);
-	mis.owner = self;
-	setorigin(mis, self.origin + '0 0 50');
-	makevectors(self.angles);
-	mis.velocity = v_forward * 300;
-	self.attack_finished = time + 0.5;
-};
-void() test_sf =
-{
-	if (time < self.attack_finished) return;
-	print("secondary fire\n");
-	self.attack_finished = time + 2;
-};
-
-void() init_weapon =
-{
-	self.primary_fire = sub_noop;
-	self.primary_fire_cb = sub_noop;
-	self.secondary_fire = sub_noop;
-	self.secondary_fire_cb = sub_noop;
-	self.reload = sub_noop;
-	self.reload_cb = sub_noop;
-};
-
-*/
-
-/*
-void() test_weapon =
-{
-	init_weapon();
-	self.classname = "test_weapon";
-	self.primary_fire = test_pf;
-	self.secondary_fire = test_sf;
-	setmodel(self, "models/testplayer.iqm");
-	self.scale = 0.25;
-	self.solid = SOLID_TRIGGER;
-	self.movetype = MOVETYPE_TOSS;
-	// setmodel
-	// setsize
-	// solid
-	// movetype
-};
-*/

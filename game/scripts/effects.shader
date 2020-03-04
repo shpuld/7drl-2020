@@ -82,3 +82,12 @@ muzzleflash
 		alphaGen entity
 	}
 }
+
+melee_proj
+{
+	{
+		map $diffuse
+		blendFunc gl_src_alpha GL_ONE
+		alphaGen entity
+	}
+}

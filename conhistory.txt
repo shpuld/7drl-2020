@@ -170,3 +170,63 @@ restart
 restart
 restart
 clear
+volume
+volume 1
+noclip
+clear
+restart
+vid_reload
+vid_reload
+vid_reload
+sv_minping 250
+restart
+cl_netfps
+cl_netfps 30
+restart
+sv_minping 350
+apropos packet loss
+net_fakeloss 0.05
+restart
+net_fakeloss 0.2
+restart
+net_fakeloss 0.1
+net_fakeloss 0.05
+net_fakeloss 0.02
+net_fakeloss 0.01
+net_fakeloss 0
+sv_minping
+sv_minping 100
+sv_minping 0
+vid_reload
+/modelviewer models/zombiegunner.iqm 
+vid_reload
+/modelviewer models/zombiegunner.iqm 
+vid_reload
+/modelviewer models/zombiegunner.iqm 
+vid_reload
+/modelviewer models/zombiegunner.iqm 
+/modelviewer models/zombiegunner.iqm 
+vid_reload
+/modelviewer models/zombiegunner.iqm 
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+r_showtris 1
+r_showtris 0
+restart
+vid_reload
+r_showtris 2
+r_showtris 1
+r_showtris 0
+vid_reload
+r_showbboxes 2
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+restat
+restart
+quit

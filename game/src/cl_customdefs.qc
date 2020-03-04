@@ -9,6 +9,7 @@ vector aim_normalized; /* from -1 to 1 on Y, X not completely normalized, affect
 
 entity player;
 
+
 //Menu stuff
 float in_menu; //what menu are we in
 float time_in_menu;

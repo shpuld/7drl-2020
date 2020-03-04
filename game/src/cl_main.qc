@@ -156,7 +156,7 @@ void() run_cl_unit_tests =
 
 float(float isnew) enemylisten =
 {
-	setsize(self, '-24 -24 0', '24 24 50');
+	setsize(self, '-20 -20 0', '20 20 50');
 	self.is_enemy = TRUE;
 	
 	return TRUE;
@@ -193,6 +193,8 @@ void(float apiver, string enginename, float enginever) CSQC_Init =
 	setmodel(gunmodel, "models/smg.iqm");
 	
 	deltalisten("models/crawler.iqm", enemylisten, 0);
+	deltalisten("models/zombiegunner.iqm", enemylisten, 0);
+	deltalisten("models/zombieberserker.iqm", enemylisten, 0);
 	deltalisten("models/crate.iqm", cratelisten, 0);
 	deltalisten("models/ladderdown.iqm", ladderlisten, 0);
 	
@@ -400,7 +402,7 @@ float() ring_predraw =
 	self.scale += frametime * 4;
 	self.frame1time += frametime * 1;
 	self.alpha -= frametime * 2;
-	add_light(self.origin, self.colormod * self.alpha, 48 * self.alpha);
+	add_light(self.origin, self.colormod * self.alpha, 60 * self.alpha);
 	if (self.alpha < 0.01)
 	{
 		remove(self);
@@ -422,6 +424,99 @@ void(vector pos, vector color, float size) spawn_ring =
 	ring.scale = size;
 	ring.alpha = 0.5;
 	setmodel(ring, "models/ring.iqm");
+}
+
+float() enemy_projectile_predraw =
+{
+	if (light_pass) return PREDRAW_AUTOADD;
+
+	vector startpos = self.origin;
+	vector endpos = self.origin + self.velocity * frametime;
+	self.angles += self.avelocity * frametime;
+	switch (self.type)
+	{
+		case EPT_MELEE:
+			other = player;
+			tracebox(startpos, self.mins, self.maxs, endpos, MOVE_OTHERONLY, self);
+			self.alpha -= frametime * 3;
+			break;
+		default:
+			traceline(startpos, endpos, 0, self);
+			break;
+	}
+	
+	if (!trace_startsolid)
+		setorigin(self, trace_endpos);
+	
+	if (trace_fraction < 1 || trace_startsolid)
+	{
+		if (trace_ent == player) sendevent("took_damage", "ff", self.dmg, self.owner.entnum);
+		
+		spawn_ring(self.origin, '0.4 0.3 0.2', 0.7);
+		remove_glowent(self);
+		remove(self);
+		
+		return PREDRAW_NEXT;
+	}
+	return PREDRAW_AUTOADD;
+}
+
+void() remove_enemy_projectile =
+{
+	remove_glowent(self);
+	remove(self);
+}
+
+void(vector pos, vector vel, float proj_type, float owner_entnum, float target) spawn_enemy_projectile =
+{
+	if (target == player_localentnum) 
+	{
+		vel = player.origin - pos;
+		vel_z = 0;
+		vel = normalize(vel);
+	}
+	entity proj = spawn();
+	setorigin(proj, pos);
+	proj.solid = SOLID_NOT;
+	proj.predraw = enemy_projectile_predraw;
+	proj.drawmask = MASK_ENGINE;
+	proj.velocity = vel;
+	proj.angles = vectoangles(vel);
+	proj.think = remove_enemy_projectile;
+	proj.owner = findfloat(world, entnum, owner_entnum);
+	proj.type = proj_type;
+	proj.alpha = 1;
+	proj.effects = EF_FULLBRIGHT;
+	make_glowent(proj);
+	
+	switch (proj_type)
+	{
+		case EPT_MELEE:
+			setmodel(proj, "models/melee_proj.iqm");
+			setsize(proj, '-16 -16 0', '16 16 8');
+			proj.dmg = 15 + floor(random() * 15);
+			proj.nextthink = time + 0.25;
+			proj.velocity *= 140;
+			proj.avelocity = '0 360 0';
+			proj.scale = 1.25;
+			break;
+		case EPT_BULLET:
+			setmodel(proj, "models/bullet.iqm");
+			setsize(proj, '0 0 0', '0 0 0');
+			proj.dmg = 15 + floor(random() * 6);
+			proj.nextthink = time + 1;
+			proj.velocity *= 700;
+			spawn_ring(proj.origin, '0.4 0.3 0.2', 0.7);
+			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQOther.wav", 0.8, 0.8);
+			break;
+		default:
+			setmodel(proj, "models/ring.iqm");
+			setsize(proj, '0 0 0', '0 0 0');
+			proj.dmg = 10;
+			proj.nextthink = time + 1;
+			proj.velocity *= 300;
+			break;
+	}
 }
 
 void() CSQC_Parse_Event =
@@ -476,6 +571,15 @@ void() CSQC_Parse_Event =
 			break;
 		case EV_CLEAR_MAP:
 			clear_csqc_map();
+			break;
+		case EV_ENEMY_PROJECTILE:
+			type = readbyte();
+			float owner = readshort();
+			target = readshort();
+			pos = readvector();
+			vel = readvector();
+			printf("targeting %.0f\n", target);
+			spawn_enemy_projectile(pos, vel, type, owner, target);
 			break;
 		default:
 			printf("No action for byte %f\n", first);

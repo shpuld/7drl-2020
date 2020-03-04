@@ -8,6 +8,7 @@ const float FRAME_IDLE = 0;
 const float FRAME_RUN = 1;
 const float FRAME_MELEE = 2;
 const float FRAME_RELOAD = 3;
+const float FRAME_SWAP = 4;
 
 const float MELEE_SLOWDOWN = 0.2;
 
@@ -62,6 +63,23 @@ vector newcampos;
 float meleetime;
 .float oldframe;
 
+void() player_play_run =
+{
+	float speed = vlen(self.velocity);
+	self.frame2 = FRAME_RUN;
+	if (speed > 20)
+	{
+		self.lerpfrac += frametime * 18;
+		self.lerpfrac = min(1, self.lerpfrac);
+		self.frame2time += frametime * speed * 0.005;
+	}
+	else
+	{
+		self.lerpfrac -= frametime * 10;
+		self.lerpfrac = max(0, self.lerpfrac);
+	}
+}
+
 float() player_predraw =
 {
     if (self.entnum == player_localentnum)
@@ -82,19 +100,7 @@ float() player_predraw =
     if (self.frame == FRAME_IDLE)
     {
 		self.frame = FRAME_IDLE;
-		self.frame2 = FRAME_RUN;
-		if (speed > 20)
-		{
-			self.lerpfrac += frametime * 15;
-			self.lerpfrac = min(1, self.lerpfrac);
-			self.frame2 = FRAME_RUN;
-			self.frame2time += frametime * speed * 0.005;
-		}
-		else
-		{
-			self.lerpfrac -= frametime * 8;
-			self.lerpfrac = max(0, self.lerpfrac);
-		}
+		player_play_run();
 	}
 	else if (self.frame == FRAME_MELEE)
 	{
@@ -103,8 +109,7 @@ float() player_predraw =
 		if (self.frame1time > 0.7) self.frame = FRAME_IDLE;
 	}
 	else if (self.frame == FRAME_RELOAD)
-	{
-		self.lerpfrac = max(0, self.lerpfrac - frametime * 20);
+	{	
 		if (self == player)
 		{
 			self.frame1time += (frameduration(self.modelindex, FRAME_RELOAD) * frametime * 0.95) / weapon_list[inv_item_id[active_weapon]].reload_time;
@@ -115,6 +120,14 @@ float() player_predraw =
 			self.frame1time += frametime * 0.8;
 			if (self.frame1time > frameduration(self.modelindex, FRAME_RELOAD)) self.frame = FRAME_IDLE;
 		}
+		player_play_run();
+		self.lerpfrac = min(0.35, self.lerpfrac);
+	}
+	else if (self.frame == FRAME_SWAP)
+	{
+		self.lerpfrac = min(0.3, self.lerpfrac);
+		self.frame1time += frametime;
+		if (self.frame1time > 0.15) self.frame = FRAME_IDLE;
 	}
     // addentity(self);
     self.oldframe = self.frame;
@@ -464,6 +477,7 @@ float(float slot) max_ammo_for =
 
 void(float slot) reload_fill =
 {
+	sound(player, CHAN_ITEM, "sounds/reload3.wav", 1, 0.2);
 	float item = inv_item_id[slot];
 
 	float leftinmag = inv_item_ammo[slot];
@@ -479,9 +493,11 @@ void(float slot) reload_with =
 	float item = inv_item_id[slot];
 	
 	if (inv_item_ammo[slot] >= max_ammo_for(slot)) return;
+	if (time < reload_finished) return;
 
 	float reload_time_mod = 1;
 	
+	sound(player, CHAN_ITEM, "sounds/reload1.wav", 1, 0.2);
 	player.frame = FRAME_RELOAD;
 	player.frame1time = 0;
 	
@@ -517,7 +533,7 @@ void(float slot) shoot_with =
 	
 	if (inv_item_ammo[slot] <= 0)
 	{
-		attack_finished = time + 0.5;
+		attack_finished = time + 0.1;
 		reload_with(slot);
 		return;
 	}
@@ -546,6 +562,8 @@ void(float slot) shoot_with =
 		e.dmg = ceil(wep->damage * dmg_mod);
 		attack_finished = time + wep->fire_rate * firerate_mod;
 	}
+	
+	if (inv_item_ammo[slot] == 0) attack_finished = time + 0.3;
 }
 
 void() melee_hit =
@@ -594,6 +612,8 @@ void(float slot) drop_item =
 	attack_finished = 0;
 	reload_finished = 0;
 	reloading = FALSE;
+	self.frame = FRAME_SWAP;
+	self.frame1time = 0;
 	sendevent("dropitem", "f", slot);
 }
 
@@ -606,8 +626,8 @@ void() swap_weapon =
 	reload_finished = 0;
 	attack_finished = time + 0.1;
 	active_weapon = !active_weapon;
-	// self.frame = FRAME_RELOAD;
-	// self.frame1time = 0.5;
+	self.frame = FRAME_SWAP;
+	self.frame1time = 0;
 }
 
 void() set_input_movevalues =
@@ -631,7 +651,7 @@ void() set_input_movevalues =
 	
 	if (player.frame == FRAME_RELOAD)
 	{
-		input_movevalues *= 0.5;
+		input_movevalues *= 0.65;
 	}
 	
 	float weapon_speed = (weapon_list[inv_item_id[active_weapon]].move_speed);

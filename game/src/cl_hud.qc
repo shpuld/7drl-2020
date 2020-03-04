@@ -84,11 +84,11 @@ void(vector pos, float width, int slot) draw_inventory_weapon =
 		
 		string id = sprintf("%isldrop", slot);
 		sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
-		sui_action_element([-4, 0], [32, 16], id, sui_noop);
+		sui_action_element([-4, 0], [36, 24], id, sui_noop);
 		sui_is_clicked(id) ? drop_item(slot) : 0;
 		
-		sui_fill([-4, 0], [32, 16], '0.5 0.5 0.5', 0.3 + 0.3 * sui_is_hovered(id), 0);
-		sui_text([-4, 0], [8, 8], "Drop", '1 1 1', 0.7 + 0.3 * sui_is_hovered(id), 0);
+		sui_fill([-4, 0], [36, 24], '0.5 0.5 0.5', 0.3 + 0.3 * sui_is_hovered(id), 0);
+		sui_text([-6, 0], [8, 8], "Drop", '1 1 1', 0.7 + 0.3 * sui_is_hovered(id), 0);
 		sui_set_align([SUI_ALIGN_START, SUI_ALIGN_START]);
 	}
 	
