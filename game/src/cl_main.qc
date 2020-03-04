@@ -310,8 +310,8 @@ void(float width, float height, float menushown) CSQC_UpdateView =
 
 	if (csqc_mapgeom)
 	{
-		float row = max(rint((campos_y - MAP_ORIGIN_y) / BLOCK_SIZE_y) - 6, 0);
-		draw_map_geom(csqc_mapgeom, row, 12);
+		float row = max(rint((campos_y - MAP_ORIGIN_y) / BLOCK_SIZE_y) - 8, 0);
+		draw_map_geom(csqc_mapgeom, row, 16);
 	}
 	
 	//does what you think it does
