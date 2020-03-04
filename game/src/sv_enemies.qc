@@ -84,6 +84,58 @@ void() attack_turn =
 	changeyaw();
 }
 
+.vector last_seen;
+.float last_seen_time;
+void(float dist) move_to_enemy =
+{
+	vector tgt = self.last_seen == '0 0 0' ? self.enemy.origin : self.last_seen;
+	vector to_enemy = normalize(tgt - self.origin);
+	vector result1, result2, result3;
+	makevectors(self.angles);
+	if (v_forward * to_enemy < 0.8) return;
+
+	result2 = result3 = self.origin;
+	tracebox(self.origin, self.mins, self.maxs, self.origin + to_enemy * dist, 0, self);
+	result1 = trace_endpos;
+	float initial_d = random() > 0.5 ? -1 : 1;
+	float compareagainststart = trace_fraction <= 0.05;
+	if (trace_fraction < 1)
+	{
+		tracebox(self.origin, self.mins, self.maxs, self.origin + v_right * dist*0.8 * initial_d, 0, self);
+		result2 = trace_endpos;
+		if (trace_fraction < 1)
+		{
+			tracebox(self.origin, self.mins, self.maxs, self.origin + v_right * dist*0.8 * -initial_d, 0, self);
+			result3 = trace_endpos;
+		}
+	}
+	float res1len, res2len, res3len;
+	if (compareagainststart)
+	{
+		res1len = 5000 - vlen(result1 - self.origin);
+		res2len = 5000 - vlen(result2 - self.origin);
+		res3len = 5000 - vlen(result3 - self.origin);
+	}
+	else
+	{
+		res1len = vlen(result1 - tgt);
+		res2len = vlen(result2 - tgt);
+		res3len = vlen(result3 - tgt);
+	}
+	if (res1len < res2len && res1len < res2len)
+	{
+		setorigin(self, result1);
+		return;
+	}
+	if (res2len < res3len)
+	{
+		setorigin(self, result2);
+		return;
+	}
+	setorigin(self, result3);
+	return;
+}
+
 .float walking;
 void() enemy_think =
 {
@@ -111,13 +163,19 @@ void() enemy_think =
 	// CHASE
 	else
 	{
-		self.frame = 0;
-		vector to_player = self.enemy.origin - self.origin;
+		float cansee = can_see(self.enemy);
+		if (cansee) 
+		{
+			self.last_seen = '0 0 0';
+			self.last_seen_time = time;
+		}
+		
+		vector to_player = cansee ? self.enemy.origin - self.origin : self.last_seen - self.origin;
 		self.ideal_yaw = vectoangles(to_player).y;
 		changeyaw();
 		
 		// ATTACK
-		if (vlen(to_player) < self.attack_range && time > self.attack_finished && can_see(self.enemy))
+		if (vlen(to_player) < self.attack_range && time > self.attack_finished && cansee)
 		{
 			self.frame = E_FRAME_ATTACK;
 			self.nextthink = time + 0.1;
@@ -128,8 +186,11 @@ void() enemy_think =
 		{
 			self.frame = E_FRAME_MOVE;
 			self.goalentity = self.enemy;
-			movetogoal(self.move_speed);
+			move_to_enemy(self.move_speed);
 		}
+		
+		if (cansee) self.last_seen = self.enemy.origin;
+		else if (time - self.last_seen_time > 10) self.enemy = world;
 	}
 	if (!self.nextthink)
 	{
@@ -172,12 +233,18 @@ void() enemy_common =
 	self.movetype = MOVETYPE_STEP;
 	self.takes_damage = TRUE;
 	self.gravity = 1;
-	self.yaw_speed = 20;
+	self.yaw_speed = 16;
 	self.think = enemy_think;
 	self.angles_y = random() * 360;
 	self.nextthink = time + 0.1 + random();
 	self.hurt = enemy_hurt;
 	self.die = enemy_die;
+	
+	if (vlen(self.origin - test_spawnpoint) < 360)
+	{
+		self.nextthink = time;
+		self.think = sub_remove;
+	}
 };
 
 void() enemy_gunner =
@@ -186,7 +253,7 @@ void() enemy_gunner =
 	enemy_common();
 	setmodel(self, "models/zombiegunner.iqm");
 	self.health = 60;
-	self.attack_range = 350;
+	self.attack_range = 250;
 	self.move_speed = 15;
 };
 

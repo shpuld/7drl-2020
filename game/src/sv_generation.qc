@@ -247,9 +247,8 @@ void() reset_map =
 	self = old_self;
 };
 
-void() next_floor =
+void() start_next_floor =
 {
-	reset_map();
 	for (entity p = player_chain_head; p; p = p.player_chain_next)
 	{
 		setorigin (p, test_spawnpoint);

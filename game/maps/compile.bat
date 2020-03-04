@@ -1,26 +1,23 @@
 @echo off
 
 cd\
-cd E:\empty_sui\game\maps
+cd E:\7drl\game\maps
 
 
 echo Copying Files...
-copy E:\empty_sui\game\maps\test.map E:\empty_sui\game\maps
+copy E:\7drl\game\maps\bigbox.map E:\7drl\game\maps
 
 
 echo Converting map...
 
 
 echo --------------QBSP--------------
-E:\mapping\tools\ericw-tools-v0.18-win32\bin\qbsp.exe test
+E:\mapping\tools\ericw-tools-v0.18-win32\bin\qbsp.exe -bsp2 bigbox
 
 echo --------------VIS---------------
-E:\mapping\tools\ericw-tools-v0.18-win32\bin\vis.exe -fast test
+E:\mapping\tools\ericw-tools-v0.18-win32\bin\vis.exe -fast bigbox
 
-echo -------------LIGHT--------------
-E:\mapping\tools\ericw-tools-v0.18-win32\bin\light.exe -bounce -bouncescale 0.5 -dirt -dirtscale 1.0 -soft -extra test
-
-copy test.bsp E:\empty_sui\game\maps
-copy test.pts E:\empty_sui\game\maps
-copy test.lit E:\empty_sui\game\maps
+copy bigbox.bsp E:\7drl\game\maps
+copy bigbox.pts E:\7drl\game\maps
+copy bigbox.lit E:\7drl\game\maps
 pause

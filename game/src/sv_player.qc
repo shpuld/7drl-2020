@@ -31,6 +31,10 @@ void() CheckImpulses =
 	case 100:
 		reset_map();
 		break;
+	case 200:
+		entity test = find(world, classname, "info_endzone");
+		setorigin(self, test.origin);
+		break;
 	}
 	self.impulse = 0;
 };

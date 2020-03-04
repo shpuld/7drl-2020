@@ -13,3 +13,20 @@ coop 1
 restart
 maxclients 3
 restart
+restart
+restart
+impulse 200
+restart
+impulse 200
+restart
+impulse 200
+restart
+impulse 200
+restart
+impulse 200
+vid_reload
+vid_reload
+vid_reload
+restart
+impulse 200
+vid_reload

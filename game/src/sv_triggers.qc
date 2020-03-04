@@ -19,31 +19,6 @@ void() func_illusionary =
 	self.solid = SOLID_NOT;
 };
 
-void() death_touch =
-{
-	printf("someone %s died\n", etos(other));
-};
-
-void() trigger_death =
-{
-	setmodel(self, self.model);
-	self.modelindex = 0;
-	self.solid = SOLID_TRIGGER;
-	self.touch = death_touch;
-};
-
-void() goal_touch =
-{
-	printf("someone %s reached goal\n", etos(other));
-};
-
-void() trigger_goal =
-{
-	setmodel(self, self.model);
-	self.modelindex = 0;
-	self.solid = SOLID_TRIGGER;
-	self.touch = goal_touch;
-};
 
 float(entity player, entity item) put_item_in_inventory =
 {
@@ -192,7 +167,7 @@ void() item_weapon =
 	self.clearable = TRUE;
 	self.item_effect = floor(weapon_effects.length * random());
 	// current mag
-	self.ammo_shells = weapon_list[i].mag_size * (random() * 0.5 + 0.5);
+	self.ammo_shells = weapon_list[i].mag_size;
 	// spare mags
 	self.ammo_nails = floor(1 + random() * 2.5);
 	self.angles = '0 0 -90';
@@ -234,13 +209,26 @@ void() item_crate =
 	self.die = crate_die;
 };
 
-void() next_floor;
+void() reset_map;
+void() start_next_floor;
 void() exit_touch =
 {
 	if (other.classname != "player") return;
-	
-	print("exit touched\n");
-	next_floor();
+
+	entity endzone = find(world, classname, "info_endzone");
+	for (entity e = player_chain_head; e; e = e.player_chain_next)
+		setorigin(e, endzone.origin);
+
+	reset_map();
+	entity oldself = self;
+	for (entity e = find(world, classname, "info_endzone_item"); e; e = find(e, classname, "info_endzone_item"))
+	{
+		self = spawn();
+		setorigin(self, e.origin);
+		item_crate();		
+	}
+	self = oldself;
+	// next_floor();
 };
 
 void() misc_exit =
@@ -252,4 +240,28 @@ void() misc_exit =
 	self.solid = SOLID_TRIGGER;
 	// self.flags = FL_FINDABLE_NONSOLID;
 	usable_chain_add(self);
+};
+
+void() info_endzone_item =
+{
+};
+
+void() real_exit_touch =
+{
+	start_next_floor();
+};
+
+// TODO:
+// on enter regular exit, start by clearing ents
+// then spawn info_endzone_items as rewards or whatever
+// then we can regenerate map
+void() info_endzone_exit =
+{
+	misc_exit();
+	self.clearable = FALSE;
+	self.touch = real_exit_touch;
+};
+
+void() info_endzone =
+{
 };

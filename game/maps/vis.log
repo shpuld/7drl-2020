@@ -1,17 +1,28 @@
----- vis / ericw-tools v0.18 ----
+---- vis / ericw-tools v0.18.1-32-g6660c5f ----
 fastvis = true
 running with 4 threads
 testlevel = 4
-LoadBSPFile: 'test.bsp'
-BSP is version 29
-     6 leafs
-     0 portals
+LoadBSPFile: 'bigbox.bsp'
+BSP is version BSP2
+    11 leafs
+    21 portals
 Calculating Base Vis:
-
+0....1....2....3....4....5....6....7....8....9...
 Calculating Full Vis:
-average leafs visible: 1
+WARNING: Leaf portals saw into leaf (0)
+WARNING: Leaf portals saw into leaf (1)
+WARNING: Leaf portals saw into leaf (2)
+WARNING: Leaf portals saw into leaf (3)
+WARNING: Leaf portals saw into leaf (4)
+WARNING: Leaf portals saw into leaf (5)
+WARNING: Leaf portals saw into leaf (6)
+WARNING: Leaf portals saw into leaf (7)
+WARNING: Leaf portals saw into leaf (8)
+WARNING: Leaf portals saw into leaf (9)
+WARNING: Leaf portals saw into leaf (10)
+average leafs visible: 11
 c_noclip: 0
 c_chains: 0
-visdatasize:6  compressed from 6
-Writing test.bsp as BSP version 29
+visdatasize:22  compressed from 22
+Writing bigbox.bsp as BSP version BSP2
   0.1 seconds elapsed
