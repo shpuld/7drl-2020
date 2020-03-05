@@ -178,6 +178,7 @@ void() ammo_box =
 	setmodel(self, "models/bullets_ammo.iqm");
 	self.clearable = TRUE;
 	self.touch = ammo_touch;
+	self.type = IT_AMMO;
 }
 
 void(entity opener) test_item =

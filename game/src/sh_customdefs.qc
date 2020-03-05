@@ -34,7 +34,7 @@ enum {
 
 // Item Types
 enum {
-	IT_WEAPON, IT_ARMOR, IT_POWERMOD
+	IT_NONE, IT_WEAPON, IT_ARMOR, IT_POWERMOD, IT_AMMO
 };
 
 // Items
@@ -254,9 +254,9 @@ struct weapon {
 weapon weapon_list[] = {
 	{ "", "", 0, 0, 0, 0, 0, 0, 0, 1.0, "", 100 },
 	{ "SMG", "models/smg.iqm", 10, 0.6, PT_SMALL_BULLET, 			1, 0.090, 1.5, 40, 0.9, "sounds/ShotSMGOther.wav", 100 },
-	{ "Micro SMG", "models/minismg.iqm", 8, 0.5, PT_SMALL_BULLET, 	1, 0.075, 1.1, 35, 1.0, "sounds/ShotSMG.wav", 100 },
+	{ "Micro SMG", "models/minismg.iqm", 8, 0.5, PT_SMALL_BULLET, 	1, 0.075, 1.1, 35, 1.0, "sounds/rifle.wav", 100 },
 	{ "Combat Rifle", "models/ar.iqm", 13, 0.7, PT_MEDIUM_BULLET, 	1, 0.125, 1.8, 30, 0.8, "sounds/ShotSMGEQ.wav", 110 },
-	{ "Bullpup", "models/bullpup.iqm", 16, 0.8, PT_MEDIUM_BULLET, 	1, 0.090, 2.0, 25, 0.85, "sounds/rifle.wav", 100 },
+	{ "Bullpup", "models/bullpup.iqm", 16, 0.8, PT_MEDIUM_BULLET, 	1, 0.090, 2.0, 25, 0.85, "sounds/ShotSMG.wav", 100 },
 	{ "Pump Shotgun", "models/sg.iqm", 18, 0.3, PT_PELLET, 			5, 0.900, 1.6, 6, 0.9, "sounds/shotgun.wav", 100 },
 	{ "Auto Shotgun", "models/autosg.iqm", 14, 0.4, PT_PELLET, 		4, 0.200, 2.2, 8, 0.8, "sounds/shotgun.wav", 110 },
 	{ "DMR", "models/rifle.iqm", 50, 0.85, PT_BIG_BULLET, 			1, 0.650, 1.8, 5, 0.75, "sounds/bigrifle.wav", 100 },

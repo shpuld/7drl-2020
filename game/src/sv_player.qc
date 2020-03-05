@@ -61,7 +61,7 @@ void() PlayerPreThink =
 {	
 	CheckImpulses();
 	
-	float closest_usable_dist = 5000;
+	float closest_usable_dist = 3000;
 	entity closest_usable = world;
 	for (entity e = usable_chain_head; e; e = e.player_chain_next)
 	{
@@ -74,9 +74,9 @@ void() PlayerPreThink =
 			closest_usable = e;
 		}
 	}
-	if (closest_usable_dist < 5000)
+	if (closest_usable_dist < 2000)
 	{
-		if (closest_usable.item_id)
+		if (closest_usable)
 		{
 			self.type = closest_usable.type;
 			self.item_id = closest_usable.item_id;
@@ -97,6 +97,7 @@ void() PlayerPreThink =
 				closest_usable.ammo_nails = 0;
 			}
 		}
+		
 		if (self.button3 && self.use_released)
 		{
 			entity oldself = self;
@@ -112,6 +113,7 @@ void() PlayerPreThink =
 	}
 	else
 	{
+		self.type = IT_NONE;
 		self.item_id = 0;
 		self.item_effect = 0;
 		self.ammo_shells = 0;

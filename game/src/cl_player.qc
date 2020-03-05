@@ -644,7 +644,7 @@ void() melee_attack =
 	player.think = melee_hit;
 	player.frame = FRAME_MELEE;
 	player.frame1time = 0;
-	sound(player, CHAN_AUTO, "sounds/meleeswing.wav", 0.7, 0.2);
+	sound(player, CHAN_ITEM, "sounds/meleeswing.wav", 0.7, 0.2);
 	if (reloading)
 	{
 		reloading = FALSE;
@@ -752,6 +752,11 @@ void() CSQC_Input_Frame =
 		float regen = get_effect_level(IEF_REGEN, active_weapon);
 		if (regen) sendevent("took_damage", "ff", -1 * regen, player_localentnum);
 		regentick = time + 2;
+	}
+	
+	if (time > attack_finished + 0.2 && !reloading && inv_item_ammo[active_weapon] == 0)
+	{
+		reload_with(active_weapon);
 	}
 };
 

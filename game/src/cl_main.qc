@@ -361,7 +361,7 @@ float(string cmd) CSQC_ConsoleCommand =
 			return TRUE;
 		case "dropgun":
 			drop_item(active_weapon);
-			if (inv_item_id[!active_weapon]) swap_weapon();
+			// if (inv_item_id[!active_weapon]) swap_weapon();
 			return TRUE;
 		default:
 			return FALSE;

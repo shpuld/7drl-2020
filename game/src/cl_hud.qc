@@ -4,7 +4,6 @@ float inventory_active;
 
 void() draw_inventory =
 {
-	if (inventory_active) return;
 	
 	float ypos = 240;
 	for (int i = 0; i < 2; i++)
@@ -22,7 +21,7 @@ void() draw_inventory =
 	float pu_ammo = getstatf(STAT_SHELLS);
 	float pu_mags = getstatf(STAT_NAILS);
 	
-	if (pu_item_id)
+	if (pu_item_type)
 	{
 		string strings[4];
 		strings[0] = "Press USE to pick up";
@@ -37,6 +36,11 @@ void() draw_inventory =
 			strings[1] = "Power Module";
 			strings[2] = strpad(16, powermod_stats_string(pu_item_effect, 1));
 			strings[3] = strpad(16, powermod_stats_string(pu_item_effect, 2));
+		}
+		else if (pu_item_type == IT_AMMO)
+		{
+			strings[1] = "Ammo";
+			strings[2] = strings[3] = "";
 		}
 
 		for (int i = 0; i < strings.length; i++)
