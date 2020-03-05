@@ -173,6 +173,19 @@ float(float isnew) cratelisten =
 	return TRUE;
 };
 
+float(float isnew) ammolisten =
+{
+	add_light(self.origin + '0 0 8', '0.3 0.3 0.1', 5);
+	return TRUE;
+};
+
+float(float isnew) powermodlisten =
+{
+	float intensity = sin(time * 2.5)*0.3 + 1.2;
+	add_light(self.origin + '0 0 0', [0.4 * intensity, 0.25 * intensity, 0.1 * intensity], 6 * intensity);
+	return TRUE;
+};
+
 float(float isnew) ladderlisten =
 {
 	float intensity = sin(time * 4) + 0.4;
@@ -200,6 +213,8 @@ void(float apiver, string enginename, float enginever) CSQC_Init =
 	deltalisten("models/zombieberserker.iqm", enemylisten, 0);
 	deltalisten("models/crate.iqm", cratelisten, 0);
 	deltalisten("models/ladderdown.iqm", ladderlisten, 0);
+	deltalisten("models/power_mod.iqm", powermodlisten, 0);
+	deltalisten("models/bullets_ammo.iqm", ammolisten, 0);
 	
 	registercommand("reload");
 	registercommand("swap");
@@ -238,8 +253,6 @@ void() set_camera =
 {
 	campos = newcampos; // getproperty(VF_ORIGIN);
 	camang = getproperty(VF_ANGLES);
-	
-	add_light(campos, '0.25 0.25 0.25', 35);
 
 	aim_normalized = crosshair_pos - [g_width/2, g_height/2];
 	aim_normalized /= g_height/2;
@@ -279,11 +292,7 @@ void(float width, float height, float menushown) CSQC_UpdateView =
 	setproperty(VF_SIZE, pixelsize * lightrenderscale);
 	// setproperty(VF_RT_DEPTH, "depth", 6, pixelsize);
 	drawfill([0, 0], pixelsize * lightrenderscale, '0 0 0', 1, 0);
-	
-	add_light('300 200 50', '1 0.5 0.25', 20);
-	add_light('250 700 50', '1 0.75 0.75', 30);
-	add_light('450 500 50', '1 1 1', 10);
-	
+
 	setproperty(VF_DRAWWORLD, 0);
 	update_lights();
 	update_static_lights();
@@ -431,6 +440,7 @@ void(vector pos, vector color, float size) spawn_ring =
 	ring.colormod = color;
 	ring.scale = size;
 	ring.alpha = 0.5;
+	ring.angles_y = random()*360;
 	setmodel(ring, "models/ring.iqm");
 }
 
@@ -450,6 +460,7 @@ float() enemy_projectile_predraw =
 			break;
 		default:
 			traceline(startpos, endpos, 0, self);
+			add_light(self.origin, '0.3 0.1 0.1', 6);
 			break;
 	}
 	
@@ -585,6 +596,7 @@ void() CSQC_Parse_Event =
 			pos = readvector();
 			// spawn effect for box breaking here
 			// light + particles
+			pointsound(pos, "sounds/meleehit-old2.wav", 1, 0.2);
 			spawn_ring(pos, '0.6 0.5 0.4', 1);
 			break;
 		case EV_CLEAR_MAP:

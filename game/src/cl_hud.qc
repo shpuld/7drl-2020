@@ -16,6 +16,7 @@ void() draw_inventory =
 		ypos += 8;
 	}
 	
+	float pu_item_type = getstatf(STAT_ITEM_TYPE);
 	float pu_item_id = getstatf(STAT_ITEM_ID);
 	float pu_item_effect = getstatf(STAT_ITEM_EFFECT);
 	float pu_ammo = getstatf(STAT_SHELLS);
@@ -25,9 +26,18 @@ void() draw_inventory =
 	{
 		string strings[4];
 		strings[0] = "Press USE to pick up";
-		strings[1] = pu_item_effect ? sprintf("%s %s", weapon_effects[pu_item_effect].name, weapon_list[pu_item_id].name) : weapon_list[pu_item_id].name;
-		strings[2] = strpad(16, weapon_stats_string(pu_item_effect, 1));
-		strings[3] = strpad(16, weapon_stats_string(pu_item_effect, 2));
+		if (pu_item_type == IT_WEAPON)
+		{
+			strings[1] = pu_item_effect ? sprintf("%s %s", weapon_effects[pu_item_effect].name, weapon_list[pu_item_id].name) : weapon_list[pu_item_id].name;
+			strings[2] = strpad(16, weapon_stats_string(pu_item_effect, 1));
+			strings[3] = strpad(16, weapon_stats_string(pu_item_effect, 2));
+		}
+		else if (pu_item_type == IT_POWERMOD)
+		{
+			strings[1] = "Power Module";
+			strings[2] = strpad(16, powermod_stats_string(pu_item_effect, 1));
+			strings[3] = strpad(16, powermod_stats_string(pu_item_effect, 2));
+		}
 
 		for (int i = 0; i < strings.length; i++)
 		{
@@ -121,7 +131,7 @@ void(vector pos, float width, int slot) draw_inventory_other =
 {
 	float ef = inv_item_effect[slot];
 	string itname = sprintf("%s", item_names[inv_item_id[slot]]);
-	string efname = ef ? strcat(weapon_effects[ef].name, " ") : ""; // CHANGE TO item_effects
+	// string efname = ef ? strcat(weapon_effects[ef].name, " ") : ""; // CHANGE TO item_effects
 	
 	vector size = [width, 24];
 	
@@ -136,11 +146,11 @@ void(vector pos, float width, int slot) draw_inventory_other =
 	else
 	{
 		float ypos = 0;
-		sui_text([0, ypos], [8, 8], sprintf("%s%s", efname, itname), '1 1 1', 1, 0);
+		// sui_text([0, ypos], [8, 8], sprintf("%s%s", efname, itname), '1 1 1', 1, 0);
+		// ypos += 8;
+		sui_text([8, ypos], [8, 8], powermod_stats_string(ef, 1), '1 1 1', 1, 0);
 		ypos += 8;
-		sui_text([8, ypos], [8, 8], weapon_stats_string(ef, 1), '1 1 1', 1, 0);
-		ypos += 8;
-		sui_text([8, ypos], [8, 8], weapon_stats_string(ef, 2), '1 1 1', 1, 0);
+		sui_text([8, ypos], [8, 8], powermod_stats_string(ef, 2), '1 1 1', 1, 0);
 		
 		string id = sprintf("%isldrop", slot);
 		sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);

@@ -15,6 +15,40 @@ const float MELEE_SLOWDOWN = 0.2;
 entity muzzleflash;
 entity gunmodel;
 
+float(item_effect * effect, float stat) stat_in_effect =
+{
+	float val = 0;
+	if (!effect) return 0;
+	if (effect->effect1 == stat) val += effect->level1;
+	if (effect->effect2 == stat) val += effect->level2;
+	return val;
+}
+
+float(float effect, float active_slot) get_effect_level =
+{
+	item_effect * ef;
+	float level = 0;
+	// First equipped weapon:
+	if (inv_item_id[active_slot])
+	{
+		ef = &(weapon_effects[inv_item_effect[active_slot]]);
+		level += stat_in_effect(ef, effect);
+	}
+	// Armor (not done yet)
+	
+	// power mods
+	for (int i = INV_SLOT_MOD1; i <= INV_SLOT_MOD3; i++)
+	{
+		if (inv_item_id[i])
+		{
+			ef = &(powermod_effects[inv_item_effect[i]]);
+			level += stat_in_effect(ef, effect);
+		}
+	}
+	
+	return level;
+}
+
 float() muzzleflash_predraw =
 {
 	if (self.alpha < 0) return PREDRAW_NEXT;
@@ -137,6 +171,16 @@ float() player_predraw =
     gunmodel.angles = vectoangles(-v_right, -v_forward);
     setmodel(gunmodel, weapon_list[inv_item_id[active_weapon]].model);
     addentity(gunmodel);
+    if (self == player)
+    {
+		
+    	float light_level = get_effect_level(IEF_LIGHT, active_weapon);
+    	add_light(self.origin, '0.25 0.25 0.25' + '0.05 0.04 0.03' * light_level, 32 + 15 * light_level);
+	}
+	else
+	{
+		add_light(self.origin, '0.25 0.25 0.25', 32);
+	}
     
     return PREDRAW_AUTOADD;
 };
@@ -191,7 +235,7 @@ void(float isnew) player_update =
 
 	self.movetype = MOVETYPE_WALK;
 		
-	setsize(self, '-16 -16 0', '16 16 64');
+	setsize(self, '-12 -12 0', '12 12 64');
 	
 	// Apply physics for every single input-frame that has not yet been
 	// acknowledged by the server (servercommandframe = last acknowledged frame)
@@ -256,11 +300,12 @@ void() move_projectile =
 		if (!trace_startsolid) self.origin = trace_endpos;
 		if (trace_fraction < 1 || trace_startsolid)
 		{
-			self.velocity = '0 0 0';
 			entity oldother = other;
 			other = trace_ent;
 			if (self.touch) self.touch();
 			other = oldother;
+			
+			self.velocity = '0 0 0';
 		}
 		
 	}
@@ -446,9 +491,28 @@ void(entity proj, vector n, entity target) send_hit =
 }
 
 
+void(vector pos, vector color, float size) spawn_ring;
+
 void() test_projectile_touch =
 {
-	send_hit(self, trace_plane_normal, other);
+	
+	if (other.is_enemy)
+	{
+		send_hit(self, normalize(-self.velocity), other);
+		sound(self, CHAN_AUTO, "sounds/meleehit2.wav", 0.8, 0.5, 110);
+		spawn_ring(self.origin, '0.35 0.08 0.04', 0.3 + 0.01 * self.dmg);
+		
+		float vampiric = get_effect_level(IEF_VAMPIRIC, active_weapon);
+		if (vampiric)
+		{
+			sendevent("took_damage", "ff", -1 * max(1, floor(self.dmg*0.1)) * vampiric, player_localentnum);
+		}
+	}
+	else
+	{
+		send_hit(self, trace_plane_normal, other);
+		sound(self, CHAN_AUTO, "sounds/meleehit-old1.wav", 0.5, 0.5, 110);
+	}
 	remove_projectile(self);
 	bullet_hit(self.origin, trace_plane_normal, other);
 };
@@ -465,10 +529,7 @@ float(float slot) max_ammo_for =
 {
 	float item = inv_item_id[slot];
 	
-	float mag_size_mod = 1;
-	item_effect * w_ef = &weapon_effects[inv_item_effect[slot]];
-	if (w_ef->effect1 == IEF_MAGSIZE) mag_size_mod += 0.2 * w_ef->level1; 
-	if (w_ef->effect2 == IEF_MAGSIZE) mag_size_mod += 0.2 * w_ef->level2; 
+	float mag_size_mod = 1 + 0.1 * get_effect_level(IEF_MAGSIZE, slot);
 	
 	float base_size = weapon_list[item].mag_size;
 	
@@ -497,15 +558,11 @@ void(float slot) reload_with =
 	if (inv_item_ammo[slot] >= max_ammo_for(slot)) return;
 	if (time < reload_finished) return;
 
-	float reload_time_mod = 1;
+	float reload_time_mod = 1 - 0.1 * get_effect_level(IEF_RELOADSPEED, slot);
 	
 	sound(player, CHAN_ITEM, "sounds/reloadbegin2.wav", 1, 0.2);
 	player.frame = FRAME_RELOAD;
 	player.frame1time = 0;
-	
-	item_effect * w_ef = &weapon_effects[inv_item_effect[slot]];
-	if (w_ef->effect1 == IEF_RELOADSPEED) reload_time_mod -= 0.1 * w_ef->level1; 
-	if (w_ef->effect2 == IEF_RELOADSPEED) reload_time_mod -= 0.1 * w_ef->level2; 
 	
 	reloading = TRUE;
 	reload_finished = time + weapon_list[item].reload_time * reload_time_mod;
@@ -515,19 +572,9 @@ void(float slot) shoot_with =
 {
 	entity e;
 	float item = inv_item_id[slot];
-	float firerate_mod = 1;
-	float acc_mod = 1;
-	float dmg_mod = 1;
-	
-	item_effect * w_ef = &weapon_effects[inv_item_effect[slot]];
-	if (w_ef->effect1 == IEF_FIRERATE) firerate_mod -= 0.1 * w_ef->level1; 
-	if (w_ef->effect2 == IEF_FIRERATE) firerate_mod -= 0.1 * w_ef->level2; 
-	
-	if (w_ef->effect1 == IEF_ACCURACY) acc_mod -= 0.1 * w_ef->level1; 
-	if (w_ef->effect2 == IEF_ACCURACY) acc_mod -= 0.1 * w_ef->level2;
-	
-	if (w_ef->effect1 == IEF_DAMAGE) dmg_mod += 0.1 * w_ef->level1;
-	if (w_ef->effect2 == IEF_DAMAGE) dmg_mod += 0.1 * w_ef->level2; 
+	float firerate_mod = max(0.1, 1 - 0.05 * get_effect_level(IEF_FIRERATE, slot));
+	float acc_mod = max(0, 1 - 0.1 * get_effect_level(IEF_ACCURACY, slot));
+	float dmg_mod = max(0.1, 1 + 0.1 * get_effect_level(IEF_DAMAGE, slot));
 	
 	vector angles = aimangles();
 	makevectors(angles);
@@ -574,13 +621,14 @@ void() melee_hit =
 	vector angles = aimangles();
 	makevectors(angles);
 	entity e = findradius(player.origin, 80);
-	float meleedmg = 25;
+	float meleedmg = 25 + 15 * get_effect_level(IEF_MELEE, active_weapon);
 	float hitsomething = FALSE;
 	while (e)
 	{
-		vector to_ent = e.origin - player.origin;
-		if (normalize(to_ent) * v_forward > 0.6 && e.is_enemy)
+		vector to_ent = e.origin - (player.origin - v_forward * 24);
+		if (normalize(to_ent) * v_forward > 0.8 && e.is_enemy)
 		{
+			spawn_ring(e.origin, '0.35 0.08 0.04', 0.3 + 0.01 * meleedmg);
 			sendevent("meleehit", "vvv", 0.5 * (e.origin + player.origin), normalize(to_ent), [e.entnum, meleedmg]);
 			hitsomething = TRUE;
 		}
@@ -670,17 +718,15 @@ void() set_input_movevalues =
 	
 	if (player.frame == FRAME_RELOAD)
 	{
-		input_movevalues *= 0.65;
+		input_movevalues *= 0.7;
 	}
 	
-	float weapon_speed = (weapon_list[inv_item_id[active_weapon]].move_speed);
-	float speed_mod = weapon_speed ? weapon_speed : 1;
-	item_effect * w_ef = &weapon_effects[inv_item_effect[active_weapon]];
-	if (w_ef->effect1 == IEF_MOVESPEED) speed_mod += 0.05 * w_ef->level1; 
-	if (w_ef->effect2 == IEF_MOVESPEED) speed_mod += 0.05 * w_ef->level2; 
-	input_movevalues *= speed_mod;
+	float weapon_speed = weapon_list[inv_item_id[active_weapon]].move_speed;
+	float speed_mod = get_effect_level(IEF_MOVESPEED, active_weapon);
+	input_movevalues *= bound(0.2, weapon_speed + 0.05 * speed_mod, 2.5);
 }
 
+float regentick;
 void() CSQC_Input_Frame =
 {
 	set_input_movevalues();
@@ -700,6 +746,12 @@ void() CSQC_Input_Frame =
 	else if (input_buttons & 2 && time >= attack_finished)
 	{
 		melee_attack();
+	}
+	if (time > regentick)
+	{
+		float regen = get_effect_level(IEF_REGEN, active_weapon);
+		if (regen) sendevent("took_damage", "ff", -1 * regen, player_localentnum);
+		regentick = time + 2;
 	}
 };
 

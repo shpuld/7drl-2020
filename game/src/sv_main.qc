@@ -24,16 +24,15 @@ void() worldspawn =
 {	
 	precache_everything();
 	
-	printf("world model %s\n", world.model);
 	if (world.model == "maps/bigbox.bsp")
 	{
-		print("big box\n");
 		init_test_map();
 	}
 	
 	clientstat(STAT_ITEM_ID, EV_FLOAT, item_id);
 	clientstat(STAT_ITEM_EFFECT, EV_FLOAT, item_effect);
-	
+	clientstat(STAT_ITEM_TYPE, EV_FLOAT, type);
+
 	#ifdef SSQC_TEST
 	run_sv_unit_tests();
 	#endif

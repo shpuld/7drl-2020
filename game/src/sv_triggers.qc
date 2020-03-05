@@ -52,7 +52,7 @@ void() item_touch =
 {
 	if (other.classname != "player") return;
 	
-	if (put_item_in_inventory(other, self)) print("success\n");
+	put_item_in_inventory(other, self);
 };
 
 void() reactivate_item =
@@ -92,67 +92,10 @@ void(float slot, float dropped_ammo, float dropped_mags) CSEv_dropitem_fff =
 	item.ammo_nails = dropped_mags;
 };
 
-
-void() item_fastreload = 
-{
-	self.type = IT_TRINKET;
-	self.item_id = I_FASTRELOAD;
-	self.clearable = TRUE;
-};
-
-void() item_sharpshooter = 
-{
-	self.type = IT_TRINKET;
-	self.item_id = I_SHARPSHOOTER;
-	self.clearable = TRUE;
-};
-
-void() ammo_touch =
-{
-	if (other.classname != "player") return;
-
-	float ammotype = 0;
-	float ammoval = 0;
-	if (self.ammo_shells)
-	{
-		ammotype = 1;
-		ammoval = self.ammo_shells;
-	}
-	else if (self.ammo_nails)
-	{
-		ammotype = 0;
-		ammoval = self.ammo_nails;
-	}
-	else if (self.ammo_cells)
-	{
-		ammotype = 2;
-		ammoval = self.ammo_cells;
-	}
-	
-	msg_entity = other;
-	BeginEvent(EV_GIVE_AMMO);
-	MulticastByte(ammotype);
-	MulticastByte(ammoval);
-	multicast('0 0 0', MULTICAST_ONE_R);
-	
-	remove(self);
-};
-
-void() item_shells =
-{
-	setmodel(self, "models/sg_ammo.iqm");
-	self.solid = SOLID_TRIGGER;
-	self.touch = ammo_touch;
-	self.ammo_shells = 10 + floor(random() * 15);
-	setsize(self, '-16 -16 0', '16 16 32');
-	self.clearable = TRUE;
-};
-
 void() item_bullets =
 {
 	setmodel(self, "models/bullets_ammo.iqm");
 	self.solid = SOLID_TRIGGER;
-	self.touch = ammo_touch;
 	self.ammo_nails = 20 + floor(random() * 40);
 	setsize(self, '-16 -16 0', '16 16 32');
 	self.clearable = TRUE;
@@ -165,7 +108,7 @@ void() item_weapon =
 	self.item_id = i;
 	setmodel(self, weapon_list[i].model);
 	self.clearable = TRUE;
-	self.item_effect = floor(weapon_effects.length * random());
+	self.item_effect = 1+ floor((weapon_effects.length - 1) * random());
 	// current mag
 	self.ammo_shells = weapon_list[i].mag_size;
 	// spare mags
@@ -173,13 +116,84 @@ void() item_weapon =
 	self.angles = '0 0 -90';
 }
 
-void() test_item =
+void(float item, float effect) spawn_weapon_cheat =
+{
+	entity e = spawn();
+	e.type = IT_WEAPON;
+	e.item_id = item;
+	setmodel(e, weapon_list[item].model);
+	e.clearable = TRUE;
+	e.item_effect = effect;
+	e.ammo_shells = weapon_list[item].mag_size;
+	e.ammo_nails = 5;
+	e.angles = '0 0 -90';
+	setorigin(e, self.origin + '0 0 5');
+	setsize(e, '-16 -16 0', '16 16 32');
+	e.touch = item_touch;
+	e.solid = SOLID_TRIGGER;
+	usable_chain_add(e);
+}
+
+void() power_module =
+{
+	self.type = IT_POWERMOD;
+	self.item_id = I_POWERMOD;
+	setmodel(self, "models/power_mod.iqm");
+	self.clearable = TRUE;
+	self.item_effect = 1 + floor((powermod_effects.length - 1) * random());
+}
+
+void() ammo_touch =
+{
+	if (other.classname != "player") return;
+	
+	msg_entity = other;
+	float gavesomething = FALSE;
+	if (other.inventory[INV_SLOT_WEAPON1].item_id)
+	{
+		BeginEvent(EV_GIVE_AMMO);
+		MulticastByte(other.inventory[INV_SLOT_WEAPON1].item_id);
+		MulticastByte(1);
+		multicast(self.origin, MULTICAST_ONE_R);
+		gavesomething = TRUE;
+	}
+	if (other.inventory[INV_SLOT_WEAPON2].item_id)
+	{
+		BeginEvent(EV_GIVE_AMMO);
+		MulticastByte(other.inventory[INV_SLOT_WEAPON2].item_id);
+		MulticastByte(1);
+		multicast(self.origin, MULTICAST_ONE_R);
+		gavesomething = TRUE;
+	}
+	
+	if (gavesomething)
+	{
+		remove(self);
+		usable_chain_remove(self);
+	}
+}
+
+void() ammo_box =
+{
+	setmodel(self, "models/bullets_ammo.iqm");
+	self.clearable = TRUE;
+	self.touch = ammo_touch;
+}
+
+void(entity opener) test_item =
 {
 	setmodel(self, "models/bomb.iqm");
 	self.solid = SOLID_TRIGGER;
 	self.touch = item_touch;
 	// self.flags = FL_FINDABLE_NONSOLID;
-	item_weapon();
+	float r = random();
+	float force_spawn_gun = opener.classname == "player" && !opener.inventory[INV_SLOT_WEAPON1].item_id && !opener.inventory[INV_SLOT_WEAPON2].item_id;
+	if (r < 0.6 || force_spawn_gun)
+		item_weapon();
+	else if (r < 0.8)
+		power_module();
+	else
+		ammo_box();
 	setsize(self, '-16 -16 0', '16 16 32');
 	usable_chain_add(self);
 };
@@ -187,7 +201,10 @@ void() test_item =
 void(entity attacker, vector dir, float amount) crate_die =
 {
 	entity drop = spawn();
-	self_call(drop, test_item);
+	entity oldself = self;
+	self = drop;
+	test_item(attacker);
+	self = oldself;
 	setorigin(drop, self.origin + '0 0 16');
 	drop.movetype = MOVETYPE_TOSS;
 	// drop.avelocity = [0, crandom() * 2500, 0];
@@ -244,6 +261,7 @@ void() misc_exit =
 
 void() info_endzone_item =
 {
+	// initial crate only
 };
 
 void() real_exit_touch =
@@ -264,4 +282,7 @@ void() info_endzone_exit =
 
 void() info_endzone =
 {
+	entity e = spawn();
+	setorigin(e, self.origin + '0 128 0');
+	self_call(e, item_crate);
 };

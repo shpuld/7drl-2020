@@ -31,6 +31,9 @@ void() CheckImpulses =
 	case 100:
 		reset_map();
 		break;
+	case 101:
+		spawn_weapon_cheat(6, 1);
+		break;
 	case 200:
 		entity test = find(world, classname, "info_endzone");
 		setorigin(self, test.origin);
@@ -41,13 +44,14 @@ void() CheckImpulses =
 
 vector() get_spawn_point =
 {
+	/*
 	if (test_spawnpoint != '0 0 0')
 	{
 		return test_spawnpoint;
 	}
-	
+	*/
 	entity spawnpoint = world;
-	spawnpoint = find(spawnpoint, classname, "info_player_start");
+	spawnpoint = find(spawnpoint, classname, "info_endzone");
 
 	return spawnpoint.origin + '0 0 1';
 };
@@ -74,6 +78,7 @@ void() PlayerPreThink =
 	{
 		if (closest_usable.item_id)
 		{
+			self.type = closest_usable.type;
 			self.item_id = closest_usable.item_id;
 			self.item_effect = closest_usable.item_effect;
 			self.ammo_shells = closest_usable.ammo_shells;
@@ -169,30 +174,11 @@ void() PlayerSpawn =
 	self.SendEntity = player_sendentity;
 	setorigin(self, get_spawn_point());
 	self.fixangle = TRUE;
-	setsize(self, [-16, -16, 0], [16, 16, 64]);
+	setsize(self, '-12 -12 0', '12 12 64');
 	self.view_ofs = [0, 0, 56];
 	self.equipped_slot = 0;
 	
 	msg_entity = self;
-	
-	/*
-	BeginEvent(EV_GIVE_AMMO);
-	MulticastByte(0);
-	MulticastByte(150);
-	multicast('0 0 0', MULTICAST_ONE_R);
-	
-	BeginEvent(EV_GIVE_AMMO);
-	MulticastByte(1);
-	MulticastByte(30);
-	multicast('0 0 0', MULTICAST_ONE_R);
-	
-	BeginEvent(EV_GIVE_AMMO);
-	MulticastByte(2);
-	MulticastByte(100);
-	multicast('0 0 0', MULTICAST_ONE_R);
-	*/
-	// self.gun = spawn();
-	// self_call(self.gun, test_weapon);
 };
 
 void() PutClientInServer =

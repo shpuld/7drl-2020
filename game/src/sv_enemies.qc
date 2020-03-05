@@ -1,6 +1,6 @@
 // Empty
 
-const float AGGRO_DIST = 300;
+const float AGGRO_DIST = 350;
 const float AGGRO_DOT = 0.5;
 
 const float E_FRAME_IDLE = 0;
@@ -60,7 +60,7 @@ void() enemy_attack =
 			break;
 	}
 	MulticastEnt(self);
-	if (v_forward * normalize(to_player) > 0.94)
+	if (v_forward * normalize(to_player) > 0.95)
 		MulticastEnt(self.enemy);
 	else
 		MulticastEnt(world);
@@ -215,7 +215,7 @@ void(entity attacker, vector dir, float amount) enemy_hurt =
 
 void(entity attacker, vector dir, float amount) enemy_die =
 {
-	self.velocity = dir * 20 * min(25, amount) + '0 0 10' * min(15, amount);
+	self.velocity = dir * 25 * min(20, amount) + '0 0 12' * min(10, amount);
 	tracebox(self.origin, '-24 -24 0', '24 24 16', self.origin, 0, self);
 	if (!trace_startsolid) setsize(self, '-24 -24 0', '24 24 15'); 
 	self.flags (-) FL_ONGROUND;

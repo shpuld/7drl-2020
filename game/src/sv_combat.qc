@@ -24,7 +24,14 @@ void(entity target, entity attacker, vector dir, float amount) damage =
 
 void(float amount, float dealer) CSEv_took_damage_ff =
 {
-	damage(self, edict_num(dealer), '0 0 0', amount);
+	if (amount < 0)
+	{
+		self.health = min(100, self.health + fabs(amount));
+	}
+	else
+	{
+		damage(self, edict_num(dealer), '0 0 0', amount);
+	}
 };
 
 void(vector org, vector vel, vector parms) CSEv_sproj_vvv =
