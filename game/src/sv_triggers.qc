@@ -274,8 +274,9 @@ void() medkit_touch =
 	if (other.classname != "player") return;
 	if (other.health >= 100) return;
 	
-	other.health = min(100, other.health + 25);
+	other.health = min(100, other.health + 20);
 	usable_chain_remove(self);
+	sound(self, CHAN_AUTO, "sounds/spawn.wav", 0.7, 0.5, 120);
 	remove(self);
 };
 
@@ -299,7 +300,7 @@ void() armor =
 void(float force_spawn_gun) snow_item_spawn =
 {
 	float r = random();
-	if (r < 0.8 || force_spawn_gun)
+	if (r < 0.85 || force_spawn_gun)
 		item_weapon();
 	else if (r < 0.9)
 		ammo_box();
@@ -312,7 +313,7 @@ void(float force_spawn_gun) snow_item_spawn =
 void(float force_spawn_gun) inside_item_spawn =
 {
 	float r = random();
-	if (r < 0.65 || force_spawn_gun)
+	if (r < 0.7 || force_spawn_gun)
 		item_weapon();
 	else if (r < 0.8)
 		ammo_box();
@@ -325,11 +326,11 @@ void(float force_spawn_gun) inside_item_spawn =
 void(float force_spawn_gun) rust_item_spawn =
 {
 	float r = random();
-	if (r < 0.6 || force_spawn_gun)
+	if (r < 0.7 || force_spawn_gun)
 		item_weapon();
 	else if (r < 0.8)
 		ammo_box();
-	else if (r < 0.95)
+	else if (r < 0.9)
 		power_module();
 	else
 		armor();
@@ -356,7 +357,7 @@ void(entity opener) test_item =
 	// self.flags = FL_FINDABLE_NONSOLID;
 	float force_spawn_gun = opener.classname == "player" && !opener.inventory[INV_SLOT_WEAPON1].item_id && !opener.inventory[INV_SLOT_WEAPON2].item_id;
 	
-	if (!force_spawn_gun && opener.health < 85 && random() < 0.2) medkit();
+	if (!force_spawn_gun && opener.health < 85 && random() < 0.1) medkit();
 	else if (current_level >= LEVEL_HECK) heck_item_spawn(force_spawn_gun);
 	else if (current_level >= LEVEL_RUST) rust_item_spawn(force_spawn_gun);
 	else if (current_level >= LEVEL_INSIDE) inside_item_spawn(force_spawn_gun);
@@ -398,8 +399,6 @@ void() reset_map;
 void() start_next_floor;
 void() exit_touch =
 {
-	if (other.classname != "player") return;
-
 	entity endzone = find(world, classname, "info_endzone");
 	for (entity e = player_chain_head; e; e = e.player_chain_next)
 		setorigin(e, endzone.origin);
@@ -418,12 +417,23 @@ void() exit_touch =
 	// next_floor();
 };
 
+void() pre_exit_touch =
+{
+	if (other.classname != "player") return;
+	if (self.nextthink >= time) return;
+
+	BeginEvent(EV_EXIT_LEVEL);
+	multicast('0 0 0', MULTICAST_ALL_R);
+	self.nextthink = time + 0.25;
+	self.think = exit_touch;
+}
+
 void() misc_exit =
 {
 	self.clearable = TRUE;
 	setmodel(self, "models/ladderdown.iqm");
 	setsize(self, '-32 -32 0', '32 32 64');
-	self.touch = exit_touch;
+	self.touch = pre_exit_touch;
 	self.solid = SOLID_TRIGGER;
 	// self.flags = FL_FINDABLE_NONSOLID;
 	usable_chain_add(self);
@@ -439,6 +449,17 @@ void() real_exit_touch =
 	start_next_floor();
 };
 
+void() pre_real_exit_touch =
+{
+	if (other.classname != "player") return;
+	if (self.nextthink >= time) return;
+
+	BeginEvent(EV_ENTER_LEVEL);
+	multicast('0 0 0', MULTICAST_ALL_R);
+	self.nextthink = time + 0.25;
+	self.think = real_exit_touch;	
+}
+
 // TODO:
 // on enter regular exit, start by clearing ents
 // then spawn info_endzone_items as rewards or whatever
@@ -447,7 +468,7 @@ void() info_endzone_exit =
 {
 	misc_exit();
 	self.clearable = FALSE;
-	self.touch = real_exit_touch;
+	self.touch = pre_real_exit_touch;
 };
 
 void() info_endzone =

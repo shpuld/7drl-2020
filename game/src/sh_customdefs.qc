@@ -12,6 +12,8 @@ const float EV_GIVE_AMMO = 13;
 const float EV_BOX_BREAK = 14;
 const float EV_CLEAR_MAP = 15;
 const float EV_ENEMY_PROJECTILE = 16;
+const float EV_EXIT_LEVEL = 17;
+const float EV_ENTER_LEVEL = 18;
 
 const int INV_SIZE = 6;
 const int INV_SLOT_WEAPON1 = 0;
@@ -109,8 +111,8 @@ item_effect powermod_effects[] =
 	{ "", IEF_MOVESPEED, 1, IEF_NONE, 0 },
 	{ "", IEF_MAGSIZE, 2, IEF_NONE, 0 },
 	{ "", IEF_RELOADSPEED, 1, IEF_NONE, 0 },
-	{ "", IEF_VAMPIRIC, 1, IEF_NONE, 0 },
-	{ "", IEF_REGEN, 1, IEF_NONE, 0 },
+	{ "", IEF_MAGSIZE, 1, IEF_NONE, 0 },
+	{ "", IEF_DAMAGE, 1, IEF_NONE, 0 },
 	{ "", IEF_LIGHT, 1, IEF_NONE, 0 },
 	{ "", IEF_MELEE, 1, IEF_NONE, 0 },
 	// good 12
@@ -121,8 +123,8 @@ item_effect powermod_effects[] =
 	{ "", IEF_MOVESPEED, 1, IEF_FIRERATE, 1 },
 	{ "", IEF_MAGSIZE, 2, IEF_RELOADSPEED, 1 },
 	{ "", IEF_RELOADSPEED, 1, IEF_MOVESPEED, 1 },
-	{ "", IEF_VAMPIRIC, 2, IEF_NONE, 0 },
-	{ "", IEF_REGEN, 2, IEF_NONE, 0 },
+	{ "", IEF_DAMAGE, 2, IEF_NONE, 0 },
+	{ "", IEF_RELOADSPEED, 2, IEF_NONE, 0 },
 	{ "", IEF_LIGHT, 2, IEF_ACCURACY, 1 },
 	{ "", IEF_MELEE, 2, IEF_MOVESPEED, 1 },
 	// best 23
@@ -133,10 +135,10 @@ item_effect powermod_effects[] =
 	{ "", IEF_MOVESPEED, 2, IEF_FIRERATE, 2 },
 	{ "", IEF_MAGSIZE, 3, IEF_RELOADSPEED, 2 },
 	{ "", IEF_RELOADSPEED, 2, IEF_MOVESPEED, 2 },
-	{ "", IEF_VAMPIRIC, 3, IEF_NONE, 0 },
-	{ "", IEF_REGEN, 3, IEF_NONE, 0 },
+	{ "", IEF_VAMPIRIC, 1, IEF_NONE, 0 },
+	{ "", IEF_REGEN, 1, IEF_NONE, 0 },
 	{ "", IEF_LIGHT, 3, IEF_ACCURACY, 2 },
-	{ "", IEF_MELEE, 3, IEF_MOVESPEED, 1 }
+	{ "", IEF_MELEE, 3, IEF_MOVESPEED, 2 }
 };
 
 item_effect armor_effects[] =
@@ -360,6 +362,8 @@ void() precache_everything =
 	precache_sound("sounds/meleehit-old2.wav");
 	precache_sound("sounds/ShotSMGEQOther.wav");
 	precache_sound("sounds/ShotSMGEQ.wav");
+	precache_sound("sounds/spawn.wav");
+	precache_sound("sounds/ladderdown.wav");
 	
 	precache_sound("sounds/oneshot1.wav");
 	precache_sound("sounds/oneshot2.wav");

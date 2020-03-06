@@ -117,7 +117,7 @@ void() enemy_attack =
 		MulticastEnt(self.enemy);
 	else
 		MulticastEnt(world);
-	MulticastVector(self.origin + v_forward * 16);
+	MulticastVector(self.origin + v_forward * 8);
 	MulticastVector(v_forward);
 	multicast(self.origin, MULTICAST_PVS);
 	
@@ -276,7 +276,7 @@ void() enemy_common =
 	self.die = enemy_die;
 	self.pain_threshold = 15;
 	
-	if (vlen(self.origin - test_spawnpoint) < 360)
+	if (vlen(self.origin - test_spawnpoint) < 380)
 	{
 		self.nextthink = time;
 		self.think = sub_remove;
@@ -288,7 +288,7 @@ void() enemy_gunner =
 	self.classname = "enemy_gunner";
 	enemy_common();
 	setmodel(self, "models/zombiegunner.iqm");
-	self.health = 60;
+	self.health = 60 + (current_level - LEVEL_INSIDE) * 15;
 	self.attack_range = 250;
 	self.move_speed = 15;
 	self.attack_delay = 0.5;
@@ -313,7 +313,7 @@ void() hell_gunner =
 	self.classname = "enemy_hellgunner";
 	enemy_common();
 	setmodel(self, "models/hellgunner.iqm");
-	self.health = 180;
+	self.health = 180 + (current_level - LEVEL_HECK) * 15;
 	self.attack_range = 280;
 	self.move_speed = 15;
 	self.attack_delay = 0.5;
@@ -327,7 +327,7 @@ void() green_gunner =
 	self.classname = "enemy_greengunner";
 	enemy_common();
 	setmodel(self, "models/greengunner.iqm");
-	self.health = 120;
+	self.health = 120 + (current_level - LEVEL_RUST) * 15;
 	self.attack_range = 280;
 	self.move_speed = 15;
 	self.attack_delay = 0.5;
@@ -340,7 +340,7 @@ void() enemy_berserker =
 	self.classname = "enemy_berserker";
 	enemy_common();
 	setmodel(self, "models/zombieberserker.iqm");
-	self.health = 95;
+	self.health = 95 + (current_level - LEVEL_INSIDE) * 20;
 	self.attack_range = 56;
 	self.move_speed = 23;
 	self.attack_delay = 0.3;
@@ -365,7 +365,7 @@ void() hell_berserker =
 	self.classname = "enemy_hellberserker";
 	enemy_common();
 	setmodel(self, "models/hellberserker.iqm");
-	self.health = 220;
+	self.health = 220 + (current_level - LEVEL_HECK) * 20;
 	self.attack_range = 55;
 	self.move_speed = 30;
 	self.attack_delay = 0.3;
@@ -378,7 +378,7 @@ void() green_berserker =
 	self.classname = "enemy_greenberserker";
 	enemy_common();
 	setmodel(self, "models/greenberserker.iqm");
-	self.health = 170;
+	self.health = 160 + (current_level - LEVEL_RUST) * 20;
 	self.attack_range = 55;
 	self.move_speed = 25;
 	self.attack_delay = 0.3;

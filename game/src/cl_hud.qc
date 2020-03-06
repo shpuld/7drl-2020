@@ -5,16 +5,22 @@ float inventory_active;
 void() draw_inventory =
 {
 	
-	float ypos = 240;
-	for (int i = 0; i < 2; i++)
+	float ypos = g_height - 64;
+	if (!inventory_active)
 	{
-		if (i == active_weapon) drawfill([0, ypos], [128, 16], '1 1 1', 0.1, 1);
-		drawstring([0, ypos], sprintf("%s %s", weapon_effects[inv_item_effect[i]].name, weapon_list[inv_item_id[i]].name), [8, 8], '1 1 1', 1, 0); 
-		ypos += 8;
-		drawstring([0, ypos], sprintf("%.0f/%.0f - %.0f", inv_item_ammo[i], max_ammo_for(i), weapon_mags[inv_item_id[i]]), [8, 8], '1 1 1', 1, 0); 
-		ypos += 8;
+		for (int i = 0; i < 2; i++)
+		{
+			drawpic([0, ypos], "textures/invbg.tga", [176, 16], '0 0.1 0', 1, 1);
+			if (i == active_weapon) drawpic([0, ypos], "textures/invbg.tga", [176, 16], '0.05 0.15 0.05', 1, 1);
+			float a = 0.6 + (active_weapon == i) * 0.4;
+			drawstring([8, ypos], sprintf("%s %s", weapon_effects[inv_item_effect[i]].name, weapon_list[inv_item_id[i]].name), [8, 8], '1 1 1', a, 0); 
+			ypos += 8;
+			if (inv_item_id[i])
+				drawstring([8, ypos], sprintf("Ammo: %.0f/%.0f  Mags: %.0f", inv_item_ammo[i], max_ammo_for(i), weapon_mags[inv_item_id[i]]), [8, 8], '1 1 1', a, 0); 
+			ypos += 8;
+		}
 	}
-	
+
 	float pu_item_type = getstatf(STAT_ITEM_TYPE);
 	float pu_item_id = getstatf(STAT_ITEM_ID);
 	float pu_item_effect = getstatf(STAT_ITEM_EFFECT);
@@ -71,8 +77,8 @@ void() draw_ammo =
 
 void() draw_health =
 {
-	string hpstr = sprintf("+%.0f/100", getstatf(STAT_HEALTH));
-	drawstring([g_width - strlen(hpstr)*16, g_height - 16], hpstr, [16, 16], '1 1 1', 1, 0);
+	string hpstr = sprintf("%.0f/100HP", getstatf(STAT_HEALTH));
+	drawstring([8, g_height - 16], hpstr, [16, 16], '1 1 1', 1, 0);
 };
 
 float old_hp;
@@ -88,15 +94,31 @@ void() draw_dmg =
 	if (a > 0) drawfill([0, 0], [g_width, g_height], '1 0.1 0.1', a, 1);
 	
 	if (dmg_amount > 0)
-		dmg_amount -= frametime * 20;
+		dmg_amount -= frametime * 25;
 	else
 		dmg_amount = 0;
 	
 	old_hp = hp;
 };
 
+void() draw_transition =
+{
+	float diff = time - entertime;
+	float a = diff <= 0.25 ? min(1, diff*4) : bound(0, 1.25 - diff*0.33, 1);
+	drawfill('0 0 0', [g_width, g_height], '0 0 0', a, 0);
+	string str = current_level > 0 ? sprintf("Entering Level %.0f", current_level) : "Entering Surface"; 
+	drawstring([g_width/2 - 8 * strlen(str), g_height/2 - 64], str, [16, 16], '1 1 1', a, 0);
+	
+	diff = time - exittime;
+	a = diff <= 0.25 ? min(1, diff*4) : bound(0, 1.25 - diff*0.33, 1);
+	drawfill('0 0 0', [g_width, g_height], '0 0 0', a, 0);
+	str = "Level Clear!"; 
+	drawstring([g_width/2 - 8 * strlen(str), g_height/2 - 64], str, [16, 16], '1 1 1', a, 0);
+}
+
 void() draw_hud =
 {
+	draw_transition();
 	draw_inventory();
 	// draw_ammo();
 	draw_health();

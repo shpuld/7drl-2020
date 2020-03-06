@@ -72,3 +72,6 @@ float reloading;
 
 float camshake;
 
+float entertime;
+float exittime;
+

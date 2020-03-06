@@ -105,6 +105,7 @@ melee_proj
 
 snowfall
 {
+	cull disable
 	{
 		map textures/snowfall.tga
 		blendFunc GL_ONE GL_ONE
@@ -113,6 +114,7 @@ snowfall
 
 fog
 {
+	cull disable
 	{
 		map textures/fog.tga
 		blendFunc GL_ONE GL_ONE
@@ -121,6 +123,7 @@ fog
 
 fog2
 {
+	cull disable
 	{
 		map textures/fog2.tga
 		blendFunc GL_ONE GL_ONE
@@ -129,6 +132,7 @@ fog2
 
 ash
 {
+	cull front
 	{
 		map textures/ash.tga
 		blendFunc GL_ONE GL_ONE

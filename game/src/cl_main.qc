@@ -265,6 +265,8 @@ void(float apiver, string enginename, float enginever) CSQC_Init =
 	registercommand("toggleinventory");
 	registercommand("dropgun");
 	
+	exittime = entertime = -10;
+	
 	#ifdef CSQC_TEST
 	run_cl_unit_tests();
 	#endif
@@ -365,39 +367,6 @@ void(float width, float height, float menushown) CSQC_UpdateView =
 
 	// drawfill([0, 0], [0, 0], [0, 0, 0], 1, 0); // black background
 	
-	float level = getstatf(STAT_LEVEL);
-	string texture = level >= LEVEL_HECK ? "ash" :
-		level >= LEVEL_RUST ? "fog2" :
-		level >= LEVEL_INSIDE ? "fog" :
-		"snowfall";
-		
-	vector overlaydelta =
-		level >= LEVEL_HECK ? [frametime * 0.1, frametime * -0.4] :
-		level >= LEVEL_RUST ? [frametime * 0.15, frametime * -0.2] :
-		level >= LEVEL_INSIDE ? [frametime * 0.15, frametime * -0.1] :
-		[frametime * (0.9 + 0.15*sin(time*5)), frametime * (1.2 + 0.04*sin(time*7))];
-	
-	R_BeginPolygon(texture, 1);
-	
-	overlayofs += overlaydelta;
-	vector camofs = [campos_x, campos_y] * 0.008;
-	vector ofs = overlayofs + camofs;
-
-	R_PolygonVertex(campos + '-160 -160 -200', ofs + [0, 0], '1 1 1', 1);
-	R_PolygonVertex(campos + '-160 160 -200', ofs + [0, 4], '1 1 1', 1);
-	R_PolygonVertex(campos + '160 160 -200', ofs + [4, 4], '1 1 1', 1);
-	R_PolygonVertex(campos + '160 -160 -200', ofs + [4, 0], '1 1 1', 1);
-	
-	R_EndPolygon();
-	
-	ofs = overlayofs + camofs * 0.75;
-	R_PolygonVertex(campos + '-160 -160 -200', ofs + [0, 0], '1 1 1', 1);
-	R_PolygonVertex(campos + '-160 160 -200', ofs + [0, 6], '1 1 1', 1);
-	R_PolygonVertex(campos + '160 160 -200', ofs + [6, 6], '1 1 1', 1);
-	R_PolygonVertex(campos + '160 -160 -200', ofs + [6, 0], '1 1 1', 1);
-	
-	R_EndPolygon();
-	
 	if (time > oneshot_ambient_time)
 	{
 		if (current_level < LEVEL_INSIDE)
@@ -428,6 +397,39 @@ void(float width, float height, float menushown) CSQC_UpdateView =
 		float row = max(rint((campos_y - MAP_ORIGIN_y) / BLOCK_SIZE_y) - 8, 0);
 		draw_map_geom(csqc_mapgeom, row, 16);
 	}
+	
+	float level = campos_x > 7000 ? LEVEL_INSIDE : current_level;
+	string texture = level >= LEVEL_HECK ? "ash" :
+		level >= LEVEL_RUST ? "fog2" :
+		level >= LEVEL_INSIDE ? "fog" :
+		"snowfall";
+		
+	vector overlaydelta =
+		level >= LEVEL_HECK ? [frametime * 0.1, frametime * -0.4] :
+		level >= LEVEL_RUST ? [frametime * 0.15, frametime * -0.2] :
+		level >= LEVEL_INSIDE ? [frametime * 0.15, frametime * -0.1] :
+		[frametime * (0.9 + 0.15*sin(time*5)), frametime * (1.2 + 0.04*sin(time*7))];
+	
+	R_BeginPolygon(texture);
+	
+	overlayofs += overlaydelta;
+	vector camofs = [campos_x, campos_y] * 0.008;
+	vector ofs = overlayofs + camofs;
+
+	R_PolygonVertex(campos + '-160 -160 -200', ofs + [0, 0], '1 1 1', 1);
+	R_PolygonVertex(campos + '-160 160 -200', ofs + [0, 4], '1 1 1', 1);
+	R_PolygonVertex(campos + '160 160 -200', ofs + [4, 4], '1 1 1', 1);
+	R_PolygonVertex(campos + '160 -160 -200', ofs + [4, 0], '1 1 1', 1);
+	
+	R_EndPolygon();
+	
+	ofs = overlayofs + camofs * 0.75;
+	R_PolygonVertex(campos + '-160 -160 -200', ofs + [0, 0], '1 1 1', 1);
+	R_PolygonVertex(campos + '-160 160 -200', ofs + [0, 6], '1 1 1', 1);
+	R_PolygonVertex(campos + '160 160 -200', ofs + [6, 6], '1 1 1', 1);
+	R_PolygonVertex(campos + '160 -160 -200', ofs + [6, 0], '1 1 1', 1);
+	
+	R_EndPolygon();
 	
 	//does what you think it does
 	renderscene();
@@ -644,16 +646,16 @@ void(vector pos, vector vel, float proj_type, float owner_entnum, float target) 
 			setsize(proj, '-16 -16 0', '16 16 8');
 			proj.dmg = 20 + floor(random() * 15);
 			proj.nextthink = time + 0.25;
-			proj.velocity *= 170;
+			proj.velocity *= 220;
 			proj.avelocity = '0 360 0';
 			proj.scale = 1.25;
 			break;
 		case EPT_MELEE_STRONG:
 			setmodel(proj, "models/melee_proj.iqm");
-			setsize(proj, '-16 -16 0', '16 16 8');
+			setsize(proj, '-20 -20 0', '20 20 8');
 			proj.dmg = 30 + floor(random() * 15);
 			proj.nextthink = time + 0.25;
-			proj.velocity *= 170;
+			proj.velocity *= 210;
 			proj.avelocity = '0 360 0';
 			proj.scale = 1.25;
 			break;
@@ -662,7 +664,7 @@ void(vector pos, vector vel, float proj_type, float owner_entnum, float target) 
 			setsize(proj, '0 0 0', '0 0 0');
 			proj.dmg = 13 + floor(random() * 6);
 			proj.nextthink = time + 1;
-			proj.velocity *= 650;
+			proj.velocity *= 720;
 			spawn_ring(proj.origin, '0.4 0.3 0.2', 0.7);
 			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQOther.wav", 0.9, 0.8);
 			break;
@@ -672,7 +674,7 @@ void(vector pos, vector vel, float proj_type, float owner_entnum, float target) 
 			setsize(proj, '0 0 0', '0 0 0');
 			proj.dmg = 23 + floor(random() * 6);
 			proj.nextthink = time + 1;
-			proj.velocity *= 800;
+			proj.velocity *= 850;
 			spawn_ring(proj.origin, '0.7 0.3 0.2', 0.9);
 			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQOther.wav", 1.0, 0.8, 70);
 			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQ.wav", 0.8, 0.8, 90);
@@ -683,7 +685,7 @@ void(vector pos, vector vel, float proj_type, float owner_entnum, float target) 
 			setsize(proj, '0 0 0', '0 0 0');
 			proj.dmg = 23 + floor(random() * 6);
 			proj.nextthink = time + 1;
-			proj.velocity *= 720;
+			proj.velocity *= 800;
 			spawn_ring(proj.origin, '0.5 0.8 0.3', 0.9);
 			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQOther.wav", 1.0, 0.8, 70);
 			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQ.wav", 0.8, 0.8, 90);
@@ -770,6 +772,14 @@ void() CSQC_Parse_Event =
 			pos = readvector();
 			vel = readvector();
 			spawn_enemy_projectile(pos, vel, type, owner, target);
+			break;
+		case EV_ENTER_LEVEL:
+			sound(world, CHAN_AUTO, "sounds/ladderdown.wav", 0.9, 0);
+			entertime = time;
+			break;
+		case EV_EXIT_LEVEL:
+			sound(world, CHAN_AUTO, "sounds/ladderdown.wav", 0.9, 0);
+			exittime = time;
 			break;
 		default:
 			printf("No action for byte %f\n", first);

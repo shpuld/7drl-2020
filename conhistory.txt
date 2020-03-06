@@ -103,3 +103,88 @@ vid_reload
 vid_reload
 vid_reload
 vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+/modelviewer models/hellberserker.iqm 
+/modelviewer models/hellberserker.iqm 
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+restart
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+restart
+r_renderscale 1
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+vid_reload
+vid_reload
+vid_reload
+/sv_sound_land ""
+restart
+vid_reload
+vid_reload
+r_showtris 1
+r_showtris 0
+restart
+restart
+vid_reload
+vid_reload
+modelviewer models/medkit.iqm
+modelviewer models/medkit.iqm
+vid_reload
+modelviewer models/medkit.iqm
+modelviewer models/medkit.iqm
+vid_reload
+vid_reload
+vid_reload
+restart
+vid_reload
+restart
+vid_reload
+restart
+snd_restart
