@@ -12,6 +12,8 @@ const float E_FRAME_DIE = 4;
 .float attack_range;
 .float move_speed;
 
+.float is_gladiatar;
+
 float(entity target) can_see =
 {
 	traceline(self.origin + '0 0 30', target.origin + '0 0 30', MOVE_ENTCHAIN, self);
@@ -170,7 +172,18 @@ void() enemy_think =
 			if (random() < 0.1) self.walking = TRUE;
 		}
 		
-		self.enemy = find_enemy();	
+		self.enemy = find_enemy();
+		if (self.enemy)
+		{
+			if (self.is_gladiatar)
+				sound_variation(self, CHAN_VOICE, "sounds/gladspot%.0f.wav", 3, 1, 0.5);
+			else
+				sound_variation(self, CHAN_VOICE, "sounds/mutiespot%.0f.wav", 7, 1, 0.5);		
+		}
+		else if (random() < 0.05)
+		{
+			sound_variation(self, CHAN_VOICE, "sounds/mutieidle%.0f.wav", 3, 1, 1.0);
+		}
 	}
 	// CHASE
 	else
@@ -216,9 +229,15 @@ void() enemy_think =
 
 void(entity attacker, vector dir, float amount) enemy_hurt =
 {
+ 
 	if (attacker.classname == "player") self.enemy = attacker;
 	if (amount < self.pain_threshold && random() < 0.8) return;
 	if (amount < self.pain_threshold*2 && random() < 0.5) return;
+	
+	if (self.is_gladiatar)
+		sound_variation(self, CHAN_VOICE, "sounds/gladhurt%.0f.wav", 2, 1, 0.5);
+	else
+		sound_variation(self, CHAN_VOICE, "sounds/mutiehurt%.0f.wav", 2, 1, 0.5);
 
 	self.frame = E_FRAME_HURT;
 	self.nextthink = time + min(0.6, 0.5 * (amount / 15));
@@ -237,6 +256,8 @@ void(entity attacker, vector dir, float amount) enemy_die =
 	self.frame = E_FRAME_DIE;
 	self.solid = SOLID_NOT;
 	self.nextthink = 0;
+	
+	sound_variation(self, CHAN_VOICE, "sounds/gladdie%.0f.wav", 2, 1, 0.5);
 };
 
 void() enemy_common =
@@ -280,11 +301,11 @@ void() ice_gunner =
 	self.classname = "enemy_gunner";
 	enemy_common();
 	setmodel(self, "models/icegunner.iqm");
-	self.health = 40;
+	self.health = 50;
 	self.attack_range = 250;
-	self.move_speed = 10;
-	self.attack_delay = 0.8;
-	self.pain_threshold = 6;
+	self.move_speed = 12;
+	self.attack_delay = 0.7;
+	self.pain_threshold = 8;
 };
 
 void() hell_gunner =
@@ -331,11 +352,12 @@ void() ice_berserker =
 	self.classname = "enemy_berserker";
 	enemy_common();
 	setmodel(self, "models/iceberserker.iqm");
-	self.health = 50;
+	self.health = 70;
 	self.attack_range = 55;
-	self.move_speed = 16;
-	self.attack_delay = 0.5;
+	self.move_speed = 19;
+	self.attack_delay = 0.4;
 	self.pain_threshold = 12;
+	self.is_gladiatar = TRUE;
 };
 
 void() hell_berserker =
@@ -366,7 +388,7 @@ void() green_berserker =
 
 void() enemy_crawler =
 {
-	if (random() > 0.4 + current_level / 2)
+	if (random() > 0.4 + current_level * 0.06)
 	{
 		remove(self);
 		return;

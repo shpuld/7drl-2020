@@ -361,10 +361,44 @@ void() precache_everything =
 	precache_sound("sounds/ShotSMGEQOther.wav");
 	precache_sound("sounds/ShotSMGEQ.wav");
 	
+	precache_sound("sounds/oneshot1.wav");
+	precache_sound("sounds/oneshot2.wav");
+	precache_sound("sounds/oneshotwind.wav");
+	precache_sound("sounds/wind1.wav");
+	precache_sound("sounds/wind2.wav");
+	precache_sound("sounds/wind3.wav");
+	precache_sound("sounds/wind4.wav");
+	
+	precache_sound("sounds/mutieidle1.wav");
+	precache_sound("sounds/mutieidle2.wav");
+	precache_sound("sounds/mutieidle3.wav");
+	precache_sound("sounds/mutiehurt1.wav");
+	precache_sound("sounds/mutiehurt2.wav");
+	precache_sound("sounds/mutiespot1.wav");
+	precache_sound("sounds/mutiespot2.wav");
+	precache_sound("sounds/mutiespot3.wav");
+	precache_sound("sounds/mutiespot4.wav");
+	precache_sound("sounds/mutiespot5.wav");
+	precache_sound("sounds/mutiespot6.wav");
+	precache_sound("sounds/mutiespot7.wav");
+	
+	precache_sound("sounds/gladdie1.wav");
+	precache_sound("sounds/gladdie2.wav");
+	precache_sound("sounds/gladhurt1.wav");
+	precache_sound("sounds/gladhurt2.wav");
+	precache_sound("sounds/gladspot1.wav");
+	precache_sound("sounds/gladspot2.wav");
+	precache_sound("sounds/gladspot3.wav");
+	
 	particleeffectnum("weapons.explosion");
 	
 	precache_guns();
 };
+
+void(entity e, float chan, string samp, float numvar, float vol, float atten) sound_variation =
+{
+	sound(e, chan, sprintf(samp, 1 + floor(random() * numvar)), vol, atten, 95 + random() * 10);
+}
 
 float() crandom =
 {

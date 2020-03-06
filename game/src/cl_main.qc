@@ -316,6 +316,10 @@ void() set_camera =
 
 vector overlayofs;
 // CALLED EVERY CLIENT RENDER FRAME
+
+float oneshot_ambient_time;
+float oneshot_wind_time;
+
 void(float width, float height, float menushown) CSQC_UpdateView =
 {
 	if (cvar("r_clear") != 8) cvar_set("r_clear", "8");
@@ -393,6 +397,28 @@ void(float width, float height, float menushown) CSQC_UpdateView =
 	R_PolygonVertex(campos + '160 -160 -200', ofs + [6, 0], '1 1 1', 1);
 	
 	R_EndPolygon();
+	
+	if (time > oneshot_ambient_time)
+	{
+		if (current_level < LEVEL_INSIDE)
+			sound(world, CHAN_AUTO, "sounds/oneshotwind.wav", 1.0, 0, 90 + random() * 20);
+		else
+			sound(world, CHAN_AUTO, sprintf("sounds/oneshot%.0f.wav", 1 + rint(random())), 0.6, 0);
+		oneshot_ambient_time = time + 8 + random() * 12;
+	}
+	
+	if (time > oneshot_wind_time && current_level < LEVEL_INSIDE)
+	{
+		sound(world, CHAN_AUTO, sprintf("sounds/wind%.0f.wav", 1 + floor(random() * 4)), 1.0, 0, 110 + random() * 20);
+		oneshot_wind_time = time + 1.5 + random() * 1.5;
+	}
+	
+	if (time > oneshot_wind_time && current_level >= LEVEL_INSIDE)
+	{
+		sound(world, CHAN_AUTO, sprintf("sounds/wind%.0f.wav", 1 + floor(random() * 4)), 0.4, 0, 60 + random() * 20);
+		oneshot_wind_time = time + 2.5 + random() * 2.0;
+	}
+
 
 	//autoadd entities received from servers for drawing	
 	addentities(MASK_ENGINE);
