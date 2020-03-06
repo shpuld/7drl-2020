@@ -101,6 +101,59 @@ void() item_bullets =
 	self.clearable = TRUE;
 };
 
+void() set_bad_weapon_effect =
+{
+	self.item_effect = WEAPON_BAD_START + floor(random() * (WEAPON_AVG_START - WEAPON_BAD_START));
+}
+
+void() set_avg_weapon_effect =
+{
+	self.item_effect = WEAPON_AVG_START + floor(random() * (WEAPON_GOOD_START - WEAPON_AVG_START));
+}
+
+void() set_good_weapon_effect =
+{
+	self.item_effect = WEAPON_GOOD_START + floor(random() * (WEAPON_SUPER_START - WEAPON_GOOD_START));
+}
+
+void() set_super_weapon_effect =
+{
+	self.item_effect = WEAPON_SUPER_START + floor(random() * (weapon_effects.length - WEAPON_SUPER_START));
+}
+
+void() set_weapon_effect =
+{
+	float r = random();
+	if (current_level >= LEVEL_HECK)
+	{
+		if (r < 0.3) set_bad_weapon_effect();
+		else if (r < 0.5) set_avg_weapon_effect();
+		else if (r < 0.9) set_good_weapon_effect();
+		else set_super_weapon_effect();				
+	}
+	else if (current_level >= LEVEL_RUST)
+	{
+		if (r < 0.4) set_bad_weapon_effect();
+		else if (r < 0.75) set_avg_weapon_effect();
+		else if (r < 0.95) set_good_weapon_effect();
+		else set_super_weapon_effect();		
+	}
+	else if (current_level >= LEVEL_INSIDE)
+	{
+		if (r < 0.6) set_bad_weapon_effect();
+		else if (r < 0.85) set_avg_weapon_effect();
+		else if (r < 0.98) set_good_weapon_effect();
+		else set_super_weapon_effect();
+	}
+	else // LEVEL_SNOW
+	{
+		if (r < 0.8) set_bad_weapon_effect();
+		else if (r < 0.96) set_avg_weapon_effect();
+		else set_good_weapon_effect();
+	}
+}
+
+
 void() item_weapon =
 {
 	self.type = IT_WEAPON;
@@ -108,7 +161,7 @@ void() item_weapon =
 	self.item_id = i;
 	setmodel(self, weapon_list[i].model);
 	self.clearable = TRUE;
-	self.item_effect = 1+ floor((weapon_effects.length - 1) * random());
+	set_weapon_effect();
 	// current mag
 	self.ammo_shells = weapon_list[i].mag_size;
 	// spare mags
@@ -134,13 +187,48 @@ void(float item, float effect) spawn_weapon_cheat =
 	usable_chain_add(e);
 }
 
+void(float start, float end) set_mod_effect =
+{
+	self.item_effect = start + floor(random() * (end - start));
+}
+
+void() set_powermod_effect =
+{
+	float r = random();
+	if (current_level >= LEVEL_HECK)
+	{
+		if (r < 0.2) set_mod_effect(MOD_BAD_START, MOD_AVG_START);
+		else if (r < 0.8) set_mod_effect(MOD_AVG_START, MOD_GOOD_START);
+		else set_mod_effect(MOD_GOOD_START, powermod_effects.length);				
+	}
+	else if (current_level >= LEVEL_RUST)
+	{
+		if (r < 0.4) set_mod_effect(MOD_BAD_START, MOD_AVG_START);
+		else if (r < 0.9) set_mod_effect(MOD_AVG_START, MOD_GOOD_START);
+		else set_mod_effect(MOD_GOOD_START, powermod_effects.length);		
+	}
+	else if (current_level >= LEVEL_INSIDE)
+	{
+		if (r < 0.6) set_mod_effect(MOD_BAD_START, MOD_AVG_START);
+		else if (r < 0.99) set_mod_effect(MOD_AVG_START, MOD_GOOD_START);
+		else set_mod_effect(MOD_GOOD_START, powermod_effects.length);			
+	}
+	else // LEVEL_SNOW
+	{
+		if (r < 0.8) set_mod_effect(MOD_BAD_START, MOD_AVG_START);
+		else if (r < 0.99) set_mod_effect(MOD_AVG_START, MOD_GOOD_START);
+		else set_mod_effect(MOD_GOOD_START, powermod_effects.length);		
+	}
+}
+
+
 void() power_module =
 {
 	self.type = IT_POWERMOD;
 	self.item_id = I_POWERMOD;
 	setmodel(self, "models/power_mod.iqm");
 	self.clearable = TRUE;
-	self.item_effect = 1 + floor((powermod_effects.length - 1) * random());
+	set_powermod_effect();
 }
 
 void() ammo_touch =
@@ -181,20 +269,99 @@ void() ammo_box =
 	self.type = IT_AMMO;
 }
 
+void() medkit_touch =
+{
+	if (other.classname != "player") return;
+	if (other.health >= 100) return;
+	
+	other.health = min(100, other.health + 25);
+	usable_chain_remove(self);
+	remove(self);
+};
+
+void() medkit =
+{
+	setmodel(self, "models/medkit.iqm");
+	self.clearable = TRUE;
+	self.touch = medkit_touch;
+	self.type = IT_MEDKIT;
+}
+
+void() armor =
+{
+	setmodel(self, "models/armor.iqm");
+	self.item_id = I_ARMOR;
+	self.item_effect = min(armor_effects.length - 1, 1 + random() * floor(current_level * 0.75));
+	self.clearable = TRUE;
+	self.type = IT_ARMOR;
+}
+
+void(float force_spawn_gun) snow_item_spawn =
+{
+	float r = random();
+	if (r < 0.8 || force_spawn_gun)
+		item_weapon();
+	else if (r < 0.9)
+		ammo_box();
+	else if (r < 0.95)
+		power_module();
+	else
+		armor();
+};
+
+void(float force_spawn_gun) inside_item_spawn =
+{
+	float r = random();
+	if (r < 0.65 || force_spawn_gun)
+		item_weapon();
+	else if (r < 0.8)
+		ammo_box();
+	else if (r < 0.9)
+		power_module();
+	else
+		armor();
+};
+
+void(float force_spawn_gun) rust_item_spawn =
+{
+	float r = random();
+	if (r < 0.6 || force_spawn_gun)
+		item_weapon();
+	else if (r < 0.8)
+		ammo_box();
+	else if (r < 0.95)
+		power_module();
+	else
+		armor();
+};
+
+void(float force_spawn_gun) heck_item_spawn =
+{
+	float r = random();
+	if (r < 0.6 || force_spawn_gun)
+		item_weapon();
+	else if (r < 0.75)
+		ammo_box();
+	else if (r < 0.9)
+		power_module();
+	else
+		armor();
+};
+
 void(entity opener) test_item =
 {
 	setmodel(self, "models/bomb.iqm");
 	self.solid = SOLID_TRIGGER;
 	self.touch = item_touch;
 	// self.flags = FL_FINDABLE_NONSOLID;
-	float r = random();
 	float force_spawn_gun = opener.classname == "player" && !opener.inventory[INV_SLOT_WEAPON1].item_id && !opener.inventory[INV_SLOT_WEAPON2].item_id;
-	if (r < 0.6 || force_spawn_gun)
-		item_weapon();
-	else if (r < 0.8)
-		power_module();
-	else
-		ammo_box();
+	
+	if (!force_spawn_gun && opener.health < 85 && random() < 0.2) medkit();
+	else if (current_level >= LEVEL_HECK) heck_item_spawn(force_spawn_gun);
+	else if (current_level >= LEVEL_RUST) rust_item_spawn(force_spawn_gun);
+	else if (current_level >= LEVEL_INSIDE) inside_item_spawn(force_spawn_gun);
+	else snow_item_spawn(force_spawn_gun);
+	
 	setsize(self, '-16 -16 0', '16 16 32');
 	usable_chain_add(self);
 };
@@ -236,6 +403,8 @@ void() exit_touch =
 	entity endzone = find(world, classname, "info_endzone");
 	for (entity e = player_chain_head; e; e = e.player_chain_next)
 		setorigin(e, endzone.origin);
+
+	current_level += 1;
 
 	reset_map();
 	entity oldself = self;
@@ -286,4 +455,25 @@ void() info_endzone =
 	entity e = spawn();
 	setorigin(e, self.origin + '0 128 0');
 	self_call(e, item_crate);
+};
+
+void() misc_light =
+{
+	self.effects |= EF_FULLBRIGHT;
+	setorigin(self, self.origin + [crandom() * 10, crandom() * 10]);
+	self.angles_y = random() * 360;
+	setmodel(self, "models/glowstick.iqm");
+	self.scale = 1.4;
+	self.clearable = TRUE;
+};
+
+void() misc_light_small =
+{
+	self.scale = 0.8;
+	self.frame = 1;
+	self.effects |= EF_FULLBRIGHT;
+	setorigin(self, self.origin + [crandom() * 10, crandom() * 10]);
+	self.angles_y = random() * 360;
+	setmodel(self, "models/glowstick.iqm");
+	self.clearable = TRUE;
 };

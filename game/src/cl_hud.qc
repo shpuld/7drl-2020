@@ -42,6 +42,17 @@ void() draw_inventory =
 			strings[1] = "Ammo";
 			strings[2] = strings[3] = "";
 		}
+		else if (pu_item_type == IT_MEDKIT)
+		{
+			strings[1] = "Medkit";
+			strings[2] = strings[3] = "";
+		}
+		else if (pu_item_type == IT_ARMOR)
+		{
+			strings[1] = sprintf("%s", armor_effects[pu_item_effect].name);
+			strings[2] = sprintf("+%.0f Defense", armor_effects[pu_item_effect].level1);
+			strings[3] = "";
+		}
 
 		for (int i = 0; i < strings.length; i++)
 		{
@@ -149,12 +160,21 @@ void(vector pos, float width, int slot) draw_inventory_other =
 	}
 	else
 	{
-		float ypos = 0;
+		float ypos = 4;
 		// sui_text([0, ypos], [8, 8], sprintf("%s%s", efname, itname), '1 1 1', 1, 0);
 		// ypos += 8;
-		sui_text([8, ypos], [8, 8], powermod_stats_string(ef, 1), '1 1 1', 1, 0);
-		ypos += 8;
-		sui_text([8, ypos], [8, 8], powermod_stats_string(ef, 2), '1 1 1', 1, 0);
+		if (slot == INV_SLOT_ARMOR)
+		{
+			sui_text([8, ypos], [8, 8], armor_effects[ef].name, '1 1 1', 1, 0);
+			ypos += 8;
+			sui_text([8, ypos], [8, 8], sprintf("+%.0f Defense", armor_effects[ef].level1), '1 1 1', 1, 0);
+		}
+		else
+		{
+			sui_text([8, ypos], [8, 8], powermod_stats_string(ef, 1), '1 1 1', 1, 0);
+			ypos += 8;
+			sui_text([8, ypos], [8, 8], powermod_stats_string(ef, 2), '1 1 1', 1, 0);
+		}
 		
 		string id = sprintf("%isldrop", slot);
 		sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
@@ -201,7 +221,7 @@ void() draw_sui =
 		draw_inventory_other([4, ypos], inv_size_x - 8, 2);
 		ypos += 32;
 		
-		sui_text([4, ypos], [8, 8], "Trinkets", '1 1 1', 0.7, 0);
+		sui_text([4, ypos], [8, 8], "Power Modules", '1 1 1', 0.7, 0);
 		ypos += 12; 
 		draw_inventory_other([4, ypos], inv_size_x - 8, 3);
 		ypos += 32;

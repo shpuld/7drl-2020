@@ -24,6 +24,8 @@ void() worldspawn =
 {	
 	precache_everything();
 	
+	current_level = LEVEL_SNOW;
+	
 	if (world.model == "maps/bigbox.bsp")
 	{
 		init_test_map();
@@ -32,6 +34,8 @@ void() worldspawn =
 	clientstat(STAT_ITEM_ID, EV_FLOAT, item_id);
 	clientstat(STAT_ITEM_EFFECT, EV_FLOAT, item_effect);
 	clientstat(STAT_ITEM_TYPE, EV_FLOAT, type);
+	
+	globalstat(STAT_LEVEL, EV_FLOAT, "current_level");
 
 	#ifdef SSQC_TEST
 	run_sv_unit_tests();

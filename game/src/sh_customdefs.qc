@@ -3,6 +3,7 @@
 const float STAT_ITEM_ID = 50;
 const float STAT_ITEM_EFFECT = 51;
 const float STAT_ITEM_TYPE = 52;
+const float STAT_LEVEL = 53;
 
 const float EV_SPAWN_PROJECTILE = 10;
 const float EV_PROJECTILE_HIT = 11;
@@ -23,25 +24,32 @@ const int INV_SLOT_MOD3 = 5;
 .float clearable;
 .float type;
 
+float current_level;
+
+const float LEVEL_SNOW = 0;
+const float LEVEL_INSIDE = 1;
+const float LEVEL_RUST = 4;
+const float LEVEL_HECK = 7;
+
 // Projectile Types
 enum {
 	PT_SMALL_BULLET, PT_MEDIUM_BULLET, PT_BIG_BULLET, PT_PELLET, PT_PLASMA, PT_LASER
 };
 
 enum {
-	EPT_MELEE, EPT_BULLET
+	EPT_MELEE, EPT_BULLET, EPT_CANNON, EPT_GREEN, EPT_MELEE_STRONG
 };
 
 // Item Types
 enum {
-	IT_NONE, IT_WEAPON, IT_ARMOR, IT_POWERMOD, IT_AMMO
+	IT_NONE, IT_WEAPON, IT_ARMOR, IT_POWERMOD, IT_AMMO, IT_MEDKIT
 };
 
 // Items
 .float item_id;
 enum {
 	I_EMPTY,
-	I_FLAKVEST,
+	I_ARMOR,
 	I_POWERMOD,
 };
 
@@ -85,10 +93,15 @@ string(float ef) effect_stat_name =
 	}
 }
 
+
+const float MOD_BAD_START = 1;
+const float MOD_AVG_START = 12;
+const float MOD_GOOD_START = 23;
+
 item_effect powermod_effects[] = 
 {
 	{ "", IEF_NONE, 0, IEF_NONE, 0 },
-	// ok
+	// ok 1
 	{ "", IEF_ACCURACY, 2, IEF_NONE, 0 },
 	{ "", IEF_FIRERATE, 2, IEF_NONE, 0 },
 	{ "", IEF_DAMAGE, 1, IEF_NONE, 0 },
@@ -100,7 +113,7 @@ item_effect powermod_effects[] =
 	{ "", IEF_REGEN, 1, IEF_NONE, 0 },
 	{ "", IEF_LIGHT, 1, IEF_NONE, 0 },
 	{ "", IEF_MELEE, 1, IEF_NONE, 0 },
-	// good
+	// good 12
 	{ "", IEF_ACCURACY, 2, IEF_DAMAGE, 1 },
 	{ "", IEF_FIRERATE, 2, IEF_RELOADSPEED, 1 },
 	{ "", IEF_FIRERATE, 2, IEF_DAMAGE, 1 },
@@ -111,8 +124,8 @@ item_effect powermod_effects[] =
 	{ "", IEF_VAMPIRIC, 2, IEF_NONE, 0 },
 	{ "", IEF_REGEN, 2, IEF_NONE, 0 },
 	{ "", IEF_LIGHT, 2, IEF_ACCURACY, 1 },
-	{ "", IEF_MELEE, 2, IEF_NONE, 0 },
-	// best
+	{ "", IEF_MELEE, 2, IEF_MOVESPEED, 1 },
+	// best 23
 	{ "", IEF_ACCURACY, 3, IEF_DAMAGE, 2 },
 	{ "", IEF_FIRERATE, 3, IEF_RELOADSPEED, 2 },
 	{ "", IEF_FIRERATE, 3, IEF_DAMAGE, 2 },
@@ -123,7 +136,17 @@ item_effect powermod_effects[] =
 	{ "", IEF_VAMPIRIC, 3, IEF_NONE, 0 },
 	{ "", IEF_REGEN, 3, IEF_NONE, 0 },
 	{ "", IEF_LIGHT, 3, IEF_ACCURACY, 2 },
-	{ "", IEF_MELEE, 3, IEF_NONE, 0 }
+	{ "", IEF_MELEE, 3, IEF_MOVESPEED, 1 }
+};
+
+item_effect armor_effects[] =
+{
+	{ "", IEF_NONE, 0, IEF_NONE, 0 },
+	// ok 1
+	{ "Flak Vest", IEF_DEFENSE, 2, IEF_NONE, 0 },
+	{ "Plate Armor", IEF_DEFENSE, 3, IEF_NONE, 0 },
+	{ "Power Armor", IEF_DEFENSE, 5, IEF_NONE, 0 },
+	{ "Turbo Armor", IEF_DEFENSE, 6, IEF_NONE, 0 },
 };
 
 string(float effect, float which) powermod_stats_string =
@@ -142,11 +165,15 @@ string(float effect, float which) powermod_stats_string =
 	return sprintf("%s%.0f %s", sign, level, effect_stat_name(ef));
 }
 
+const float WEAPON_BAD_START = 1;
+const float WEAPON_AVG_START = 13;
+const float WEAPON_GOOD_START = 22;
+const float WEAPON_SUPER_START = 40;
 
 item_effect weapon_effects[] = 
 {
 	{ "", IEF_NONE, 0, IEF_NONE, 0 },
-	// Bad
+	// Bad, 1
 	{ "Junk", IEF_ACCURACY, -4, IEF_DAMAGE, -3 },
 	{ "Junk", IEF_ACCURACY, -3, IEF_DAMAGE, -4 },
 	{ "Junk", IEF_FIRERATE, -4, IEF_DAMAGE, -1 },
@@ -159,7 +186,7 @@ item_effect weapon_effects[] =
 	{ "Clunky", IEF_RELOADSPEED, -3, IEF_ACCURACY, -1 },
 	{ "Clunky", IEF_RELOADSPEED, -2, IEF_ACCURACY, -2 },
 	{ "Clunky", IEF_RELOADSPEED, -1, IEF_NONE, 0 },
-	// Neutral
+	// Neutral 13
 	{ "Average", IEF_FIRERATE, 1, IEF_RELOADSPEED, -1 },
 	{ "Average", IEF_FIRERATE, 1, IEF_DAMAGE, -1 },
 	{ "Average", IEF_FIRERATE, 1, IEF_ACCURACY, -1 },
@@ -169,7 +196,7 @@ item_effect weapon_effects[] =
 	{ "Average", IEF_DAMAGE, 1, IEF_RELOADSPEED, -1 },
 	{ "Average", IEF_DAMAGE, 1, IEF_MOVESPEED, -1 },
 	{ "Average", IEF_DAMAGE, 1, IEF_ACCURACY, -1 },
-	// Slightly good
+	// Slightly good 22
 	{ "Strong", IEF_DAMAGE, 1, IEF_NONE, 0 },
 	{ "Strong", IEF_DAMAGE, 3, IEF_MOVESPEED, -2 },
 	{ "Strong", IEF_DAMAGE, 2, IEF_MOVESPEED, -1 },
@@ -188,7 +215,7 @@ item_effect weapon_effects[] =
 	{ "Quick", IEF_RELOADSPEED, 2, IEF_FIRERATE, -1 },
 	{ "Quick", IEF_RELOADSPEED, 1, IEF_NONE, 0 },
 	{ "Quick", IEF_RELOADSPEED, 3, IEF_ACCURACY, -2 },
-	// Really good
+	// Really good 40
 	{ "Superb", IEF_DAMAGE, 2, IEF_RELOADSPEED, 2 },
 	{ "Great", IEF_DAMAGE, 2, IEF_FIRERATE, 2 },
 	{ "Blazing", IEF_MOVESPEED, 2, IEF_RELOADSPEED, 2 },
@@ -253,10 +280,10 @@ struct weapon {
 
 weapon weapon_list[] = {
 	{ "", "", 0, 0, 0, 0, 0, 0, 0, 1.0, "", 100 },
-	{ "SMG", "models/smg.iqm", 10, 0.6, PT_SMALL_BULLET, 			1, 0.090, 1.5, 40, 0.9, "sounds/ShotSMGOther.wav", 100 },
+	{ "SMG", "models/smg.iqm", 10, 0.6, PT_SMALL_BULLET, 			1, 0.090, 1.5, 40, 0.9, "sounds/ShotSMG.wav", 100 },
 	{ "Micro SMG", "models/minismg.iqm", 8, 0.5, PT_SMALL_BULLET, 	1, 0.075, 1.1, 35, 1.0, "sounds/rifle.wav", 100 },
 	{ "Combat Rifle", "models/ar.iqm", 13, 0.7, PT_MEDIUM_BULLET, 	1, 0.125, 1.8, 30, 0.8, "sounds/ShotSMGEQ.wav", 110 },
-	{ "Bullpup", "models/bullpup.iqm", 16, 0.8, PT_MEDIUM_BULLET, 	1, 0.090, 2.0, 25, 0.85, "sounds/ShotSMG.wav", 100 },
+	{ "Bullpup", "models/bullpup.iqm", 16, 0.8, PT_MEDIUM_BULLET, 	1, 0.090, 2.0, 25, 0.85, "sounds/ShotSMGOther.wav", 100 },
 	{ "Pump Shotgun", "models/sg.iqm", 18, 0.3, PT_PELLET, 			5, 0.900, 1.6, 6, 0.9, "sounds/shotgun.wav", 100 },
 	{ "Auto Shotgun", "models/autosg.iqm", 14, 0.4, PT_PELLET, 		4, 0.200, 2.2, 8, 0.8, "sounds/shotgun.wav", 110 },
 	{ "DMR", "models/rifle.iqm", 50, 0.85, PT_BIG_BULLET, 			1, 0.650, 1.8, 5, 0.75, "sounds/bigrifle.wav", 100 },
@@ -283,9 +310,13 @@ float() spread_random =
 	return random_table[randi];
 }
 
+float PART_BLOOD;
+
 void() precache_everything =
 {
-	precache_sound("demon/dland2.wav");
+	PART_BLOOD = particleeffectnum("weapons.blood");
+
+	precache_sound("sounds/demon/dland2.wav");
 	precache_model("models/testplayer.iqm");
 	precache_model("models/player.iqm");
 	precache_model("models/light.iqm");
@@ -293,6 +324,7 @@ void() precache_everything =
 	precache_model("models/crawler.iqm");
 	precache_model("models/bomb.iqm");
 	precache_model("models/bullet.iqm");
+	precache_model("models/slime.iqm");
 	precache_model("models/crate.iqm");
 	precache_model("models/sg_ammo.iqm");
 	precache_model("models/bullets_ammo.iqm");
@@ -300,9 +332,18 @@ void() precache_everything =
 	precache_model("models/ring.iqm");
 	precache_model("models/muzzleflash.iqm");
 	precache_model("models/zombiegunner.iqm");
+	precache_model("models/icegunner.iqm");
+	precache_model("models/hellgunner.iqm");
+	precache_model("models/greengunner.iqm");
 	precache_model("models/zombieberserker.iqm");
+	precache_model("models/iceberserker.iqm");
+	precache_model("models/hellberserker.iqm");
+	precache_model("models/greenberserker.iqm");
 	precache_model("models/melee_proj.iqm");
 	precache_model("models/power_mod.iqm");
+	precache_model("models/glowstick.iqm");
+	precache_model("models/medkit.iqm");
+	precache_model("models/armor.iqm");
 	
 	precache_sound("sounds/t75.wav");
 	precache_sound("sounds/reloadbegin.wav");
@@ -318,6 +359,7 @@ void() precache_everything =
 	precache_sound("sounds/meleehit-old1.wav");
 	precache_sound("sounds/meleehit-old2.wav");
 	precache_sound("sounds/ShotSMGEQOther.wav");
+	precache_sound("sounds/ShotSMGEQ.wav");
 	
 	particleeffectnum("weapons.explosion");
 	

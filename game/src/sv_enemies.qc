@@ -1,7 +1,7 @@
 // Empty
 
 const float AGGRO_DIST = 350;
-const float AGGRO_DOT = 0.5;
+const float AGGRO_DOT = 0.4;
 
 const float E_FRAME_IDLE = 0;
 const float E_FRAME_MOVE = 1;
@@ -14,9 +14,33 @@ const float E_FRAME_DIE = 4;
 
 float(entity target) can_see =
 {
-	traceline(self.origin + '0 0 30', target.origin + '0 0 30', 0, self);
-	if (trace_ent == target) return TRUE;
-	return FALSE;
+	traceline(self.origin + '0 0 30', target.origin + '0 0 30', MOVE_ENTCHAIN, self);
+	for (entity e = trace_ent; e; e = e.chain)
+	{
+		if (e.movetype == MOVETYPE_NONE && e != target) return FALSE;
+	}
+	return TRUE;
+};
+
+float(float a, float b) yaw_diff =
+{
+	return fabs((a - b + 180) % 360 - 180);
+}
+
+void(float dist) move_to_enemy =
+{
+	if (yaw_diff(self.angles_y, self.ideal_yaw) > 45)
+	{
+		changeyaw();
+		return;
+	}
+	float success = walkmove(self.ideal_yaw, dist);
+	if (!success) success = walkmove(self.ideal_yaw + 25, dist);
+	if (!success) success = walkmove(self.ideal_yaw - 25, dist);
+	if (!success) success = walkmove(self.ideal_yaw + 65, dist);
+	if (!success) success = walkmove(self.ideal_yaw - 65, dist);
+	if (!success) success = walkmove(self.ideal_yaw + 90, dist);
+	if (!success) success = walkmove(self.ideal_yaw - 90, dist);
 };
 
 entity() find_enemy =
@@ -36,6 +60,8 @@ entity() find_enemy =
 
 void() enemy_think;
 
+.float shots_left;
+
 void() enemy_attack =
 {
 	vector to_player = self.enemy.origin - self.origin;
@@ -43,17 +69,42 @@ void() enemy_attack =
 	
 	makevectors(self.angles);
 	
+	self.nextthink = time + 0.5;
+	self.think = enemy_think;
+	
 	BeginEvent(EV_ENEMY_PROJECTILE);
 	switch (self.classname)
 	{
 		case "enemy_berserker":
 			changeyaw();
 			MulticastByte(EPT_MELEE);
-			self.attack_finished += 0.2;
+			self.attack_finished += 0.3;
+			break;
+		case "enemy_hellberserker":
+			changeyaw();
+			MulticastByte(EPT_MELEE_STRONG);
+			self.attack_finished += 0.3;
+			break;
+		case "enemy_greenberserker":
+			changeyaw();
+			MulticastByte(EPT_MELEE_STRONG);
+			self.attack_finished += 0.4;
+			break;
+		case "enemy-icegunner":
+			MulticastByte(EPT_BULLET);
+			self.attack_finished += 1.1;
 			break;
 		case "enemy_gunner":
 			MulticastByte(EPT_BULLET);
-			self.attack_finished += 1.0;
+			self.attack_finished += 2.0;
+			break;
+		case "enemy_hellgunner":
+			MulticastByte(EPT_CANNON);
+			self.attack_finished += 1.3;
+			break;
+		case "enemy_greengunner":
+			MulticastByte(EPT_GREEN);
+			self.attack_finished += 2.0;
 			break;
 		default:
 			MulticastByte(EPT_BULLET);
@@ -67,13 +118,19 @@ void() enemy_attack =
 	MulticastVector(self.origin + v_forward * 16);
 	MulticastVector(v_forward);
 	multicast(self.origin, MULTICAST_PVS);
-	self.nextthink = time + 0.5;
-	self.think = enemy_think;
+	
+	if (self.shots_left)
+	{
+		self.nextthink = time + 0.25;
+		self.think = enemy_attack;
+		self.shots_left -= 1;
+	}
 };
 
+.float attack_delay;
 void() attack_turn =
 {
-	if (self.attack_finished - time < 0.55)
+	if (self.attack_finished - time < (1 - self.attack_delay))
 		self.think = enemy_attack;
 	else
 		self.think = attack_turn;
@@ -82,59 +139,14 @@ void() attack_turn =
 	vector to_player = self.enemy.origin - self.origin;
 	self.ideal_yaw = vectoangles(to_player).y;
 	changeyaw();
+	if (self.attack_range < 100) move_to_enemy(self.move_speed * 0.65);
+	
+	self.shots_left = self.ammo_shells;
 }
 
 .vector last_seen;
 .float last_seen_time;
-void(float dist) move_to_enemy =
-{
-	vector tgt = self.last_seen == '0 0 0' ? self.enemy.origin : self.last_seen;
-	vector to_enemy = normalize(tgt - self.origin);
-	vector result1, result2, result3;
-	makevectors(self.angles);
-	if (v_forward * to_enemy < 0.8) return;
 
-	result2 = result3 = self.origin;
-	tracebox(self.origin, self.mins, self.maxs, self.origin + to_enemy * dist, 0, self);
-	result1 = trace_endpos;
-	float initial_d = random() > 0.5 ? -1 : 1;
-	float compareagainststart = trace_fraction <= 0.05;
-	if (trace_fraction < 1)
-	{
-		tracebox(self.origin, self.mins, self.maxs, self.origin + v_right * dist*0.8 * initial_d, 0, self);
-		result2 = trace_endpos;
-		if (trace_fraction < 1)
-		{
-			tracebox(self.origin, self.mins, self.maxs, self.origin + v_right * dist*0.8 * -initial_d, 0, self);
-			result3 = trace_endpos;
-		}
-	}
-	float res1len, res2len, res3len;
-	if (compareagainststart)
-	{
-		res1len = 5000 - vlen(result1 - self.origin);
-		res2len = 5000 - vlen(result2 - self.origin);
-		res3len = 5000 - vlen(result3 - self.origin);
-	}
-	else
-	{
-		res1len = vlen(result1 - tgt);
-		res2len = vlen(result2 - tgt);
-		res3len = vlen(result3 - tgt);
-	}
-	if (res1len < res2len && res1len < res2len)
-	{
-		setorigin(self, result1);
-		return;
-	}
-	if (res2len < res3len)
-	{
-		setorigin(self, result2);
-		return;
-	}
-	setorigin(self, result3);
-	return;
-}
 
 .float walking;
 void() enemy_think =
@@ -200,11 +212,13 @@ void() enemy_think =
 };
 
 
+.float pain_threshold;
+
 void(entity attacker, vector dir, float amount) enemy_hurt =
 {
 	if (attacker.classname == "player") self.enemy = attacker;
-	if (amount < 15 && random() < 0.8) return;
-	if (amount < 25 && random() < 0.4) return;
+	if (amount < self.pain_threshold && random() < 0.8) return;
+	if (amount < self.pain_threshold*2 && random() < 0.5) return;
 
 	self.frame = E_FRAME_HURT;
 	self.nextthink = time + min(0.6, 0.5 * (amount / 15));
@@ -229,7 +243,7 @@ void() enemy_common =
 {
 	self.clearable = TRUE;
 	setsize(self, '-16 -16 0', '16 16 56');
-	self.solid = SOLID_BBOX;
+	self.solid = SOLID_BBOX; 
 	self.movetype = MOVETYPE_STEP;
 	self.takes_damage = TRUE;
 	self.gravity = 1;
@@ -239,6 +253,7 @@ void() enemy_common =
 	self.nextthink = time + 0.1 + random();
 	self.hurt = enemy_hurt;
 	self.die = enemy_die;
+	self.pain_threshold = 15;
 	
 	if (vlen(self.origin - test_spawnpoint) < 360)
 	{
@@ -255,20 +270,127 @@ void() enemy_gunner =
 	self.health = 60;
 	self.attack_range = 250;
 	self.move_speed = 15;
+	self.attack_delay = 0.5;
+	self.pain_threshold = 13;
+	self.ammo_shells = 2;
 };
+
+void() ice_gunner =
+{
+	self.classname = "enemy_gunner";
+	enemy_common();
+	setmodel(self, "models/icegunner.iqm");
+	self.health = 40;
+	self.attack_range = 250;
+	self.move_speed = 10;
+	self.attack_delay = 0.8;
+	self.pain_threshold = 6;
+};
+
+void() hell_gunner =
+{
+	self.classname = "enemy_hellgunner";
+	enemy_common();
+	setmodel(self, "models/hellgunner.iqm");
+	self.health = 180;
+	self.attack_range = 280;
+	self.move_speed = 15;
+	self.attack_delay = 0.5;
+	self.pain_threshold = 25;
+	self.ammo_shells = 1;
+	self.yaw_speed = 20;
+};
+
+void() green_gunner =
+{
+	self.classname = "enemy_greengunner";
+	enemy_common();
+	setmodel(self, "models/greengunner.iqm");
+	self.health = 120;
+	self.attack_range = 280;
+	self.move_speed = 15;
+	self.attack_delay = 0.5;
+	self.pain_threshold = 20;
+};
+
 
 void() enemy_berserker =
 {
 	self.classname = "enemy_berserker";
 	enemy_common();
 	setmodel(self, "models/zombieberserker.iqm");
-	self.health = 90;
-	self.attack_range = 50;
-	self.move_speed = 25;
+	self.health = 95;
+	self.attack_range = 56;
+	self.move_speed = 23;
+	self.attack_delay = 0.3;
+	self.pain_threshold = 22;
 };
+
+void() ice_berserker =
+{
+	self.classname = "enemy_berserker";
+	enemy_common();
+	setmodel(self, "models/iceberserker.iqm");
+	self.health = 50;
+	self.attack_range = 55;
+	self.move_speed = 16;
+	self.attack_delay = 0.5;
+	self.pain_threshold = 12;
+};
+
+void() hell_berserker =
+{
+	self.classname = "enemy_hellberserker";
+	enemy_common();
+	setmodel(self, "models/hellberserker.iqm");
+	self.health = 220;
+	self.attack_range = 55;
+	self.move_speed = 30;
+	self.attack_delay = 0.3;
+	self.pain_threshold = 30;
+	self.yaw_speed = 20;
+};
+
+void() green_berserker =
+{
+	self.classname = "enemy_greenberserker";
+	enemy_common();
+	setmodel(self, "models/greenberserker.iqm");
+	self.health = 170;
+	self.attack_range = 55;
+	self.move_speed = 25;
+	self.attack_delay = 0.3;
+	self.pain_threshold = 25;
+};
+
 
 void() enemy_crawler =
 {
-	if (random() < 0.5) enemy_gunner();
-	else enemy_berserker();
+	if (random() > 0.4 + current_level / 2)
+	{
+		remove(self);
+		return;
+	}
+	
+	float r = random();
+	if (current_level >= LEVEL_HECK)
+	{
+		if (r < 0.5) hell_berserker();
+		else hell_gunner();
+	}
+	else if (current_level >= LEVEL_RUST)
+	{
+		if (r < 0.5) green_berserker();
+		else green_gunner();
+	}
+	else if (current_level >= LEVEL_INSIDE)
+	{
+		if (r < 0.5) enemy_berserker();
+		else enemy_gunner();
+	}
+	else // LEVEL_SNOW
+	{
+		if (r < 0.5) ice_berserker();
+		else ice_gunner();
+	}
 };

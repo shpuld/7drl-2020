@@ -35,7 +35,11 @@ float(float effect, float active_slot) get_effect_level =
 		level += stat_in_effect(ef, effect);
 	}
 	// Armor (not done yet)
-	
+	if (inv_item_id[INV_SLOT_ARMOR])
+	{
+		ef = &(armor_effects[inv_item_effect[INV_SLOT_ARMOR]]);
+		level += stat_in_effect(ef, effect);
+	}
 	// power mods
 	for (int i = INV_SLOT_MOD1; i <= INV_SLOT_MOD3; i++)
 	{
@@ -401,7 +405,7 @@ entity(vector org, vector vel, float type) spawn_projectile =
 	proj.projectile_type = type;
 	proj.drawmask = MASK_ENGINE;
 	proj.effects = EF_ADDITIVE | EF_FULLBRIGHT;
-	proj.nextthink = time + 1.2;
+	proj.nextthink = time + 0.5;
 	proj.think = clean_projectile;
 	
 	switch (type)
@@ -436,6 +440,8 @@ entity(vector org, vector vel, float type) spawn_projectile =
 	return proj;
 }
 
+void(vector pos, vector color, float size) spawn_ring;
+
 void(vector org, vector n, entity target) bullet_hit =
 {
 	self.nextthink = time + 0.2;
@@ -445,7 +451,6 @@ void(vector org, vector n, entity target) bullet_hit =
 	self.touch = sub_noop;
 	remove_glowent(self);
 	self.origin = org;
-	self.velocity = '0 0 0';
 	
 	int numsparks = 2 + random() * 3;
 	for (int i = 0; i < numsparks;  i++)
@@ -463,6 +468,19 @@ void(vector org, vector n, entity target) bullet_hit =
 		spark.angles = vectoangles(spark.velocity);
 		make_glowent(spark);
 	}
+	
+	if (target.is_enemy == 1)
+	{
+		sound(self, CHAN_AUTO, "sounds/meleehit2.wav", 0.8, 0.5, 110);
+		spawn_ring(self.origin, '0.35 0.08 0.04', 0.3 + 0.01 * self.dmg);
+		pointparticles(PART_BLOOD, self.origin + normalize(self.velocity) * 16, normalize(self.velocity));
+	}
+	else
+	{
+		sound(self, CHAN_AUTO, "sounds/meleehit-old1.wav", 0.5, 0.5, 110);
+	}
+	
+	self.velocity = '0 0 0';
 };
 
 
@@ -490,28 +508,29 @@ void(entity proj, vector n, entity target) send_hit =
 	sendevent("projhit", "vvv", proj.origin, n, [proj.id, target.entnum, proj.dmg]);
 }
 
-
-void(vector pos, vector color, float size) spawn_ring;
-
+float vampiric_hit_counter;
 void() test_projectile_touch =
 {
 	
 	if (other.is_enemy)
 	{
 		send_hit(self, normalize(-self.velocity), other);
-		sound(self, CHAN_AUTO, "sounds/meleehit2.wav", 0.8, 0.5, 110);
-		spawn_ring(self.origin, '0.35 0.08 0.04', 0.3 + 0.01 * self.dmg);
 		
 		float vampiric = get_effect_level(IEF_VAMPIRIC, active_weapon);
-		if (vampiric)
+		if (vampiric && other.is_enemy == 1)
 		{
-			sendevent("took_damage", "ff", -1 * max(1, floor(self.dmg*0.1)) * vampiric, player_localentnum);
+			vampiric_hit_counter++;
+			if (vampiric_hit_counter >= 3)
+			{
+				sendevent("took_damage", "ff", -1 * max(1, floor(self.dmg*0.1)) * vampiric, player_localentnum);
+				vampiric_hit_counter = 0;
+			}
 		}
 	}
 	else
 	{
 		send_hit(self, trace_plane_normal, other);
-		sound(self, CHAN_AUTO, "sounds/meleehit-old1.wav", 0.5, 0.5, 110);
+		
 	}
 	remove_projectile(self);
 	bullet_hit(self.origin, trace_plane_normal, other);
@@ -751,7 +770,7 @@ void() CSQC_Input_Frame =
 	{
 		float regen = get_effect_level(IEF_REGEN, active_weapon);
 		if (regen) sendevent("took_damage", "ff", -1 * regen, player_localentnum);
-		regentick = time + 2;
+		regentick = time + 5;
 	}
 	
 	if (time > attack_finished + 0.2 && !reloading && inv_item_ammo[active_weapon] == 0)

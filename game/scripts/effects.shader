@@ -9,6 +9,17 @@ aparticle
 	}
 }
 
+aparticle2
+{
+	{
+		map particles/splat.tga
+		alphagen vertex
+		rgbGen vertex
+		alphafunc GE128
+	}
+}
+
+
 lightpoly
 {
 	cull disable
@@ -89,5 +100,37 @@ melee_proj
 		map $diffuse
 		blendFunc gl_src_alpha GL_ONE
 		alphaGen entity
+	}
+}
+
+snowfall
+{
+	{
+		map textures/snowfall.tga
+		blendFunc GL_ONE GL_ONE
+	}
+}
+
+fog
+{
+	{
+		map textures/fog.tga
+		blendFunc GL_ONE GL_ONE
+	}
+}
+
+fog2
+{
+	{
+		map textures/fog2.tga
+		blendFunc GL_ONE GL_ONE
+	}
+}
+
+ash
+{
+	{
+		map textures/ash.tga
+		blendFunc GL_ONE GL_ONE
 	}
 }

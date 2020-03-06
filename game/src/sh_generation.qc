@@ -12,10 +12,10 @@ const int DIR_S = 4;
 const int DIR_W = 8;
 
 enum {
-	TC_EMPTY, TC_SPAWN, TC_EXIT, TC_ENEMY1, TC_ITEM1
+	TC_EMPTY, TC_SPAWN, TC_EXIT, TC_ENEMY1, TC_ITEM1, TC_LIGHT, TC_LIGHTSMALL
 };
 
-const float NUM_CONTENT_TYPES = 5;
+const float NUM_CONTENT_TYPES = 7;
 
 string(int contenttype) content_name =
 {
@@ -26,6 +26,8 @@ string(int contenttype) content_name =
 		case TC_EXIT: return "Exit";
 		case TC_ENEMY1: return "Enm1";
 		case TC_ITEM1: return "Item1";
+		case TC_LIGHT: return "Light";
+		case TC_LIGHTSMALL: return "LightSm";
 		default: return "Unkn";
 	}
 };
@@ -38,7 +40,9 @@ vector(int contenttype) content_color =
 		case TC_SPAWN: return '0 1 0';
 		case TC_EXIT: return '0 1 1';
 		case TC_ENEMY1: return '1 0 0';
-		case TC_ITEM1: return '1 1 0';
+		case TC_ITEM1: return '0.5 1.0 0';
+		case TC_LIGHT: return '1 1 0.5';
+		case TC_LIGHTSMALL: return '0.8 0.7 0.2';
 		default: return '1 0 1';
 	}
 };

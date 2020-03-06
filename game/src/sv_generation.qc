@@ -55,6 +55,16 @@ void(entity e, int content) spawn_content =
 		setorigin(newent, e.origin);
 		self_call(newent, misc_exit);
 		break;
+	case TC_LIGHT:
+		newent = spawn();
+		setorigin(newent, e.origin);
+		self_call(newent, misc_light);
+		break;
+	case TC_LIGHTSMALL:
+		newent = spawn();
+		setorigin(newent, e.origin);
+		self_call(newent, misc_light_small);
+		break;
 	default: break;
 	}
 };
@@ -142,8 +152,11 @@ void(tile_map * tilemap, entity * emap) apply_tilemap_to_emap =
 	}
 };
 
+tile_set * outside_tile_set;
 tile_set * test_tile_set;
+
 tile_map test_tile_map;
+
 meta_map test_meta_map;
 
 void() apply_tilemap_wrapper =
@@ -202,10 +215,15 @@ entity emap_init;
 void() init_test_map =
 {
 	emap_init = spawn();
+	outside_tile_set = new_tile_set();
 	test_tile_set = new_tile_set();
+	read_tile_set("outside", outside_tile_set);
 	read_tile_set("cofe_enm", test_tile_set);
 	generate_map(&test_meta_map);
-	fill_map(&test_tile_map, &test_meta_map, test_tile_set);
+	if (current_level < LEVEL_INSIDE || current_level >= LEVEL_HECK)
+		fill_map(&test_tile_map, &test_meta_map, outside_tile_set);
+	else
+		fill_map(&test_tile_map, &test_meta_map, test_tile_set);
 	set_map_goal_point(&test_tile_map, &test_meta_map);
 	test_spawnpoint = get_map_spawn_point(&test_tile_map, &test_meta_map);
 	entity old_self = self;
@@ -238,7 +256,10 @@ void() reset_map =
 	}
 
 	generate_map(&test_meta_map);
-	fill_map(&test_tile_map, &test_meta_map, test_tile_set);
+	if (current_level < LEVEL_INSIDE || current_level >= LEVEL_HECK)
+		fill_map(&test_tile_map, &test_meta_map, outside_tile_set);
+	else
+		fill_map(&test_tile_map, &test_meta_map, test_tile_set);
 	set_map_goal_point(&test_tile_map, &test_meta_map);
 	test_spawnpoint = get_map_spawn_point(&test_tile_map, &test_meta_map);
 	entity old_self = self;

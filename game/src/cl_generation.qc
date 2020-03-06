@@ -31,7 +31,14 @@ void(map_geom * mapgeom, int startrow, int numrows) draw_map_geom =
 	int start_index_ofs = startrow * INDICES_PER_ROW;
 	int * indices_ptr = &(mapgeom->indices[start_index_ofs]);
 	//printf("numindices: %i\n", num_indices);
-	addtrisoup_simple("test_blocks", 0, &(mapgeom->rows[0]->blocks[0]->verts[0]), indices_ptr, num_indices);
+	float level = getstatf(STAT_LEVEL);
+	string texture = 
+		level >= LEVEL_HECK ? "heck_blocks" :
+		level >= LEVEL_RUST ? "rust_blocks" :
+		level >= LEVEL_INSIDE ?  "test_blocks" :
+		"ice_blocks";
+
+	addtrisoup_simple(texture, 0, &(mapgeom->rows[0]->blocks[0]->verts[0]), indices_ptr, num_indices);
 };
 
 block_geom * (map_geom * mapgeom, vector pos) block_geom_for_pos =
@@ -263,10 +270,24 @@ void(map_geom * mapgeom, tile_map * map, vector pos) shape_block =
 	vector world_ofs = MAP_ORIGIN + [BLOCK_SIZE_x * pos_x, BLOCK_SIZE_y * pos_y] - BLOCK_SIZE * 0.5;
 	float xpos, ypos;
 	vector st_infos = tile_s_base_and_rot(map, pos);
+	
+	float wobble_magnitude = getstatf(STAT_LEVEL) == 0 ? 3 : 0;
+	float level = getstatf(STAT_LEVEL);
+	// x = vert frequency, y = hor frequency, z = magnitude
+	vector wobble_values = 
+		level >= LEVEL_HECK ? [85, 95, 4] :
+		level >= LEVEL_RUST ? [75, 85, level - LEVEL_RUST + 1] :
+		level >= LEVEL_INSIDE ? [64, 64, 0] :
+		level >= LEVEL_SNOW ? [95, 105, 3] :
+		'1 1 0';
+
 	for (int i = 0; i < 4; i++)
 	{
 		xpos = world_ofs_x + vertex_x_ofs(i);
 		ypos = world_ofs_y + vertex_y_ofs(i);
+		// xpos += sin(xpos * 1.7) * 8;
+		ypos += cos(xpos * wobble_values_x) * wobble_values_z;
+		xpos += sin(ypos * wobble_values_y) * wobble_values_z;
 		geom->verts[i].xyz[0] = xpos;
 		geom->verts[i].xyz[1] = ypos;
 		geom->verts[i].xyz[2] = blockheight;

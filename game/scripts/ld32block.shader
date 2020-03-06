@@ -27,3 +27,33 @@ test_blocks
 		alphaGen entity
 	}
 }
+
+ice_blocks
+{
+	//cull disable
+	{
+		map $nearest:models/block/ice_blocks.png
+		rgbGen entity
+		alphaGen entity
+	}
+}
+
+rust_blocks
+{
+	//cull disable
+	{
+		map $nearest:models/block/rust_blocks.png
+		rgbGen entity
+		alphaGen entity
+	}
+}
+
+heck_blocks
+{
+	//cull disable
+	{
+		map $nearest:models/block/heck_blocks.png
+		rgbGen entity
+		alphaGen entity
+	}
+}

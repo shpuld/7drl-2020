@@ -30,3 +30,76 @@ vid_reload
 restart
 impulse 200
 vid_reload
+impulse 101
+impulse 101
+restart
+restart
+sv_maxclients
+sv_maxclients 4
+coop 1
+restart
+sv_minping 150
+sv_minping 500
+cl_netfps
+cl_netfps 30
+cl_netfps 20
+cl_netfps 10
+sv_minping -500
+cl_netfps 30
+restart
+sv_minping
+sv_minping 0
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_restart
+vid_restart
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+restart
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload

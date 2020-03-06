@@ -64,7 +64,7 @@ void() update_glowents =
 
 entity lightent;
 int num_lights;
-const int MAX_LIGHTS = 128;
+const int MAX_LIGHTS = 160;
 light_t lights[MAX_LIGHTS];
 light_t static_lights[MAX_LIGHTS];
 
@@ -168,7 +168,7 @@ float(float isnew) enemylisten =
 float(float isnew) cratelisten =
 {
 	setsize(self, '-24 -24 0', '24 24 50');
-	self.is_enemy = TRUE;
+	self.is_enemy = 2;
 	add_light(self.origin + '0 8 24', '0.1 0.4 0.1', 6);
 	return TRUE;
 };
@@ -176,6 +176,12 @@ float(float isnew) cratelisten =
 float(float isnew) ammolisten =
 {
 	add_light(self.origin + '0 0 8', '0.3 0.3 0.1', 5);
+	return TRUE;
+};
+
+float(float isnew) medkitlisten =
+{
+	add_light(self.origin + '0 0 8', '0.15 0.2 0.3', 5);
 	return TRUE;
 };
 
@@ -192,6 +198,36 @@ float(float isnew) ladderlisten =
 	add_light(self.origin + '0 32 0', [intensity, 0.1 * intensity, 0.1 * intensity], 12 * intensity);
 	return TRUE;
 };
+
+.int lighti;
+float(float isnew) lightlisten =
+{
+	if (isnew && !self.lighti)
+	{
+		vector colorbase;
+		if (self.frame == 0) colorbase =
+			current_level >= LEVEL_HECK ? '0.5 0.4 0.3' :
+			current_level >= LEVEL_RUST ? '0.3 0.4 0.2' :
+			current_level >= LEVEL_INSIDE ? '0.3 0.4 0.4' :
+			'0.2 0.5 0.4';
+		else colorbase =
+			current_level >= LEVEL_HECK ? '0.5 0.4 0.3' :
+			current_level >= LEVEL_RUST ? '0.3 0.4 0.2' :
+			current_level >= LEVEL_INSIDE ? '0.3 0.15 0.1' :
+			'0.1 0.3 0.2'; 
+		
+		float radius = self.frame == 0 ? 33 + random() * 15 : 18 + random() * 6;
+		add_static_light(self.origin, 0.8 * colorbase + randomvec() * 0.07, radius);
+	}
+	
+	if (current_level < LEVEL_INSIDE)
+	{
+		if (self.frame == 0) add_light(self.origin, '0.2 0.2 0.2', 5 + 2*sin(time*50));
+		return TRUE;
+	}
+	self.modelindex = 0;
+	return TRUE;
+}; 
 
 void(float apiver, string enginename, float enginever) CSQC_Init =
 {
@@ -210,11 +246,19 @@ void(float apiver, string enginename, float enginever) CSQC_Init =
 	
 	deltalisten("models/crawler.iqm", enemylisten, 0);
 	deltalisten("models/zombiegunner.iqm", enemylisten, 0);
+	deltalisten("models/hellgunner.iqm", enemylisten, 0);
+	deltalisten("models/icegunner.iqm", enemylisten, 0);
+	deltalisten("models/greengunner.iqm", enemylisten, 0);
 	deltalisten("models/zombieberserker.iqm", enemylisten, 0);
+	deltalisten("models/iceberserker.iqm", enemylisten, 0);
+	deltalisten("models/hellberserker.iqm", enemylisten, 0);
+	deltalisten("models/greenberserker.iqm", enemylisten, 0);
 	deltalisten("models/crate.iqm", cratelisten, 0);
 	deltalisten("models/ladderdown.iqm", ladderlisten, 0);
 	deltalisten("models/power_mod.iqm", powermodlisten, 0);
 	deltalisten("models/bullets_ammo.iqm", ammolisten, 0);
+	deltalisten("models/medkit.iqm", medkitlisten, 0);
+	deltalisten("models/glowstick.iqm", lightlisten, 0);
 	
 	registercommand("reload");
 	registercommand("swap");
@@ -228,10 +272,12 @@ void(float apiver, string enginename, float enginever) CSQC_Init =
 
 void() CSQC_WorldLoaded =
 {
+	/*
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
-		add_static_light([MAP_ORIGIN_x + random() * 64 * 32, MAP_ORIGIN_y + random() * 64 * 48, 50], [random() * 0.5, random() * 0.5, random() * 0.5], 10 + random() * 28);
+		add_static_light([MAP_ORIGIN_x + random() * 64 * 32, MAP_ORIGIN_y + random() * 64 * 48, 50], [random() * 0.1 + 0.2, random() * 0.1 + 0.2, random() * 0.2 + 0.2], 10 + random() * 28);
 	}
+	*/
 };
 
 void(float isnew) CSQC_Ent_Update =
@@ -265,9 +311,10 @@ void() set_camera =
 	
 	setproperty(VF_ORIGIN, campos);
 	setproperty(VF_ANGLES, camang);
-	setproperty(VF_AFOV, 60);	
+	setproperty(VF_AFOV, 60);
 };
 
+vector overlayofs;
 // CALLED EVERY CLIENT RENDER FRAME
 void(float width, float height, float menushown) CSQC_UpdateView =
 {
@@ -275,7 +322,7 @@ void(float width, float height, float menushown) CSQC_UpdateView =
 	//clear and update our global screen resolution vars
 	g_width = width;
 	g_height = height;
-	
+	current_level = getstatf(STAT_LEVEL);
 	if (player) predict_player();
 	
 	// testing post proc for lighting
@@ -313,6 +360,39 @@ void(float width, float height, float menushown) CSQC_UpdateView =
 	setproperty(VF_DRAWCROSSHAIR, 0);
 
 	// drawfill([0, 0], [0, 0], [0, 0, 0], 1, 0); // black background
+	
+	float level = getstatf(STAT_LEVEL);
+	string texture = level >= LEVEL_HECK ? "ash" :
+		level >= LEVEL_RUST ? "fog2" :
+		level >= LEVEL_INSIDE ? "fog" :
+		"snowfall";
+		
+	vector overlaydelta =
+		level >= LEVEL_HECK ? [frametime * 0.1, frametime * -0.4] :
+		level >= LEVEL_RUST ? [frametime * 0.15, frametime * -0.2] :
+		level >= LEVEL_INSIDE ? [frametime * 0.15, frametime * -0.1] :
+		[frametime * (0.9 + 0.15*sin(time*5)), frametime * (1.2 + 0.04*sin(time*7))];
+	
+	R_BeginPolygon(texture, 1);
+	
+	overlayofs += overlaydelta;
+	vector camofs = [campos_x, campos_y] * 0.008;
+	vector ofs = overlayofs + camofs;
+
+	R_PolygonVertex(campos + '-160 -160 -200', ofs + [0, 0], '1 1 1', 1);
+	R_PolygonVertex(campos + '-160 160 -200', ofs + [0, 4], '1 1 1', 1);
+	R_PolygonVertex(campos + '160 160 -200', ofs + [4, 4], '1 1 1', 1);
+	R_PolygonVertex(campos + '160 -160 -200', ofs + [4, 0], '1 1 1', 1);
+	
+	R_EndPolygon();
+	
+	ofs = overlayofs + camofs * 0.75;
+	R_PolygonVertex(campos + '-160 -160 -200', ofs + [0, 0], '1 1 1', 1);
+	R_PolygonVertex(campos + '-160 160 -200', ofs + [0, 6], '1 1 1', 1);
+	R_PolygonVertex(campos + '160 160 -200', ofs + [6, 6], '1 1 1', 1);
+	R_PolygonVertex(campos + '160 -160 -200', ofs + [6, 0], '1 1 1', 1);
+	
+	R_EndPolygon();
 
 	//autoadd entities received from servers for drawing	
 	addentities(MASK_ENGINE);
@@ -458,9 +538,17 @@ float() enemy_projectile_predraw =
 			tracebox(startpos, self.mins, self.maxs, endpos, MOVE_OTHERONLY, self);
 			self.alpha -= frametime * 3;
 			break;
+		case EPT_CANNON:
+			traceline(startpos, endpos, 0, self);
+			add_light(self.origin + normalize(self.velocity)*32, '0.4 0.2 0.1', 24);
+			break;
+		case EPT_GREEN:
+			traceline(startpos, endpos, 0, self);
+			add_light(self.origin + normalize(self.velocity)*32, '0.2 0.4 0.1', 16);
+			break;
 		default:
 			traceline(startpos, endpos, 0, self);
-			add_light(self.origin, '0.3 0.1 0.1', 6);
+			add_light(self.origin + normalize(self.velocity)*16, '0.3 0.1 0.1', 8);
 			break;
 	}
 	
@@ -469,9 +557,24 @@ float() enemy_projectile_predraw =
 	
 	if (trace_fraction < 1 || trace_startsolid)
 	{
-		if (trace_ent == player) sendevent("took_damage", "ff", self.dmg, self.owner.entnum);
+		float defmod = get_effect_level(IEF_DEFENSE, active_weapon);
+		if (trace_ent == player) sendevent("took_damage", "ff", max(3, floor(self.dmg * (1 - defmod * 0.075))), self.owner.entnum);
 		
-		spawn_ring(self.origin, '0.4 0.3 0.2', 0.7);
+		switch (self.type)
+		{
+			case EPT_MELEE:
+				spawn_ring(self.origin, '0.3 0.3 0.3', 0.7);
+				break;
+			case EPT_CANNON:
+				spawn_ring(self.origin, '0.5 0.3 0.2', 1.2);
+				break;
+			case EPT_GREEN:
+				spawn_ring(self.origin, '0.3 0.6 0.2', 0.9);
+				break;
+			default:
+				spawn_ring(self.origin, '0.4 0.3 0.2', 0.7);
+				break;
+		}
 		remove_glowent(self);
 		remove(self);
 		
@@ -513,20 +616,51 @@ void(vector pos, vector vel, float proj_type, float owner_entnum, float target) 
 		case EPT_MELEE:
 			setmodel(proj, "models/melee_proj.iqm");
 			setsize(proj, '-16 -16 0', '16 16 8');
-			proj.dmg = 15 + floor(random() * 15);
+			proj.dmg = 20 + floor(random() * 15);
 			proj.nextthink = time + 0.25;
-			proj.velocity *= 140;
+			proj.velocity *= 170;
+			proj.avelocity = '0 360 0';
+			proj.scale = 1.25;
+			break;
+		case EPT_MELEE_STRONG:
+			setmodel(proj, "models/melee_proj.iqm");
+			setsize(proj, '-16 -16 0', '16 16 8');
+			proj.dmg = 30 + floor(random() * 15);
+			proj.nextthink = time + 0.25;
+			proj.velocity *= 170;
 			proj.avelocity = '0 360 0';
 			proj.scale = 1.25;
 			break;
 		case EPT_BULLET:
 			setmodel(proj, "models/bullet.iqm");
 			setsize(proj, '0 0 0', '0 0 0');
-			proj.dmg = 15 + floor(random() * 6);
+			proj.dmg = 13 + floor(random() * 6);
 			proj.nextthink = time + 1;
 			proj.velocity *= 650;
 			spawn_ring(proj.origin, '0.4 0.3 0.2', 0.7);
 			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQOther.wav", 0.9, 0.8);
+			break;
+		case EPT_CANNON:
+			setmodel(proj, "models/bullet.iqm");
+			proj.scale = 2;
+			setsize(proj, '0 0 0', '0 0 0');
+			proj.dmg = 23 + floor(random() * 6);
+			proj.nextthink = time + 1;
+			proj.velocity *= 800;
+			spawn_ring(proj.origin, '0.7 0.3 0.2', 0.9);
+			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQOther.wav", 1.0, 0.8, 70);
+			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQ.wav", 0.8, 0.8, 90);
+			break;
+		case EPT_GREEN:
+			setmodel(proj, "models/slime.iqm");
+			proj.scale = 1;
+			setsize(proj, '0 0 0', '0 0 0');
+			proj.dmg = 23 + floor(random() * 6);
+			proj.nextthink = time + 1;
+			proj.velocity *= 720;
+			spawn_ring(proj.origin, '0.5 0.8 0.3', 0.9);
+			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQOther.wav", 1.0, 0.8, 70);
+			sound(proj, CHAN_AUTO, "sounds/ShotSMGEQ.wav", 0.8, 0.8, 90);
 			break;
 		default:
 			setmodel(proj, "models/ring.iqm");
@@ -601,6 +735,7 @@ void() CSQC_Parse_Event =
 			break;
 		case EV_CLEAR_MAP:
 			clear_csqc_map();
+			clear_static_lights();
 			break;
 		case EV_ENEMY_PROJECTILE:
 			type = readbyte();
