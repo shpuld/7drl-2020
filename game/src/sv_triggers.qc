@@ -126,28 +126,28 @@ void() set_weapon_effect =
 	float r = random();
 	if (current_level >= LEVEL_HECK)
 	{
-		if (r < 0.15) set_bad_weapon_effect();
+		if (r < 0.1) set_bad_weapon_effect();
 		else if (r < 0.4) set_avg_weapon_effect();
 		else if (r < 0.85) set_good_weapon_effect();
 		else set_super_weapon_effect();				
 	}
 	else if (current_level >= LEVEL_RUST)
 	{
-		if (r < 0.4) set_bad_weapon_effect();
-		else if (r < 0.75) set_avg_weapon_effect();
+		if (r < 0.2) set_bad_weapon_effect();
+		else if (r < 0.6) set_avg_weapon_effect();
 		else if (r < 0.95) set_good_weapon_effect();
 		else set_super_weapon_effect();		
 	}
 	else if (current_level >= LEVEL_INSIDE)
 	{
-		if (r < 0.6) set_bad_weapon_effect();
-		else if (r < 0.85) set_avg_weapon_effect();
+		if (r < 0.5) set_bad_weapon_effect();
+		else if (r < 0.8) set_avg_weapon_effect();
 		else if (r < 0.98) set_good_weapon_effect();
 		else set_super_weapon_effect();
 	}
 	else // LEVEL_SNOW
 	{
-		if (r < 0.8) set_bad_weapon_effect();
+		if (r < 0.75) set_bad_weapon_effect();
 		else if (r < 0.96) set_avg_weapon_effect();
 		else set_good_weapon_effect();
 	}
@@ -197,7 +197,7 @@ void() set_powermod_effect =
 	float r = random();
 	if (current_level >= LEVEL_HECK)
 	{
-		if (r < 0.2) set_mod_effect(MOD_BAD_START, MOD_AVG_START);
+		if (r < 0.1) set_mod_effect(MOD_BAD_START, MOD_AVG_START);
 		else if (r < 0.6) set_mod_effect(MOD_AVG_START, MOD_GOOD_START);
 		else set_mod_effect(MOD_GOOD_START, powermod_effects.length);				
 	}
@@ -210,7 +210,7 @@ void() set_powermod_effect =
 	else if (current_level >= LEVEL_INSIDE)
 	{
 		if (r < 0.6) set_mod_effect(MOD_BAD_START, MOD_AVG_START);
-		else if (r < 0.99) set_mod_effect(MOD_AVG_START, MOD_GOOD_START);
+		else if (r < 0.96) set_mod_effect(MOD_AVG_START, MOD_GOOD_START);
 		else set_mod_effect(MOD_GOOD_START, powermod_effects.length);			
 	}
 	else // LEVEL_SNOW
@@ -457,6 +457,7 @@ void() misc_exit =
 		return;
 	}
 
+	self.type = IT_LADDER;
 	setmodel(self, "models/ladderdown.iqm");
 	setsize(self, '-32 -32 0', '32 32 64');
 	self.touch = pre_exit_touch;

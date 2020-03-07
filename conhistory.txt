@@ -212,3 +212,39 @@ vid_reload
 vid_reload
 vid_reload
 restart
+music 1
+restart
+disconenct
+disconnect
+showtutorial
+showtutorial test
+showtutorial test
+showtutorial test
+showtutorial test
+showtutorial test
+showtutorial test
+showtutorial test
+showtutorial test
+showtutorial start
+showtutorial start
+showtutorial start
+showtutorial inv
+showtutorial inv
+showtutorial inv
+showtutorial inv
+showtutorial inv
+showtutorial inv
+showtutorial inv
+showtutorial inv
+showtutorial inv
+showtutorial start
+showtutorial start
+showtutorial start
+showtutorial start
+showtutorial start
+disconnect
+showtutorial start
+vid_reload
+vid_reload
+vid_reload
+volume 0.75

@@ -4,15 +4,15 @@ float inventory_active;
 
 void() draw_inventory =
 {
-	
+	string keyname;
 	float ypos = g_height - 64;
 	if (!inventory_active)
 	{
 		tokenize(findkeysforcommand("toggleinventory"));
-		string keyname = keynumtostring(stof(argv(0)));
+		keyname = keynumtostring(stof(argv(0)));
 		if (keyname == "01") keyname = "unbound";
 		
-		drawstring([8, ypos - 16], sprintf("[%s] Inventory", keyname), [8, 8], '1 1 1', 0.4, 0);
+		drawstring([8, ypos - 16], sprintf("[%s] Inventory", strtoupper(keyname)), [8, 8], '1 1 1', 0.4, 0);
 		for (int i = 0; i < 2; i++)
 		{
 			drawpic([0, ypos], "textures/invbg.tga", [176, 16], '0.1 0.1 0.1', 1, 1);
@@ -35,7 +35,12 @@ void() draw_inventory =
 	if (pu_item_type)
 	{
 		string strings[4];
-		strings[0] = "Press USE to pick up";
+		
+		tokenize(findkeysforcommand("+button3"));
+		keyname = keynumtostring(stof(argv(0)));
+		if (keyname == "01") keyname = "unbound";
+		
+		strings[0] = sprintf("Press [%s] to pick up", strtoupper(keyname));
 		float full = FALSE;
 		if (pu_item_type == IT_WEAPON)
 		{
@@ -71,6 +76,13 @@ void() draw_inventory =
 			strings[2] = sprintf("+%.0f Defense", armor_effects[pu_item_effect].level1);
 			strings[3] = "";
 		}
+		else if (pu_item_type == IT_LADDER)
+		{
+			strings[0] = sprintf("Press [%s] to go down.", strtoupper(keyname));
+			strings[1] = strings[2] = strings[3] = "";
+		}
+		
+		
 		if (full) strings[0] = "Inventory full, can't pick up";
 		vector col = full ? '1 0.8 0.6' : '1 1 1';
 		for (int i = 0; i < strings.length; i++)

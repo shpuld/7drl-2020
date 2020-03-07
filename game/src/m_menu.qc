@@ -164,13 +164,14 @@ void(string id, vector pos, vector size, __inout vector scrollofs) bind_list =
 	sui_list_view_end();	
 };
 
-
+string current_tutorial;
 float current_menu;
 const float MENU_MAIN = 1;
 const float MENU_SETTINGS = 2;
 const float MENU_HELP = 3;
 const float MENU_TILEEDITOR = 4;
 const float MENU_METAMAP = 5;
+const float MENU_TUTORIAL = 6;
 
 vector binds_scroll;
 void() settings_menu =
@@ -250,7 +251,18 @@ void() help_menu =
 void() main_menu =
 {
 	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_START]);
-	sui_text([0, 64], FS_BIG, "Title Screen", [1, 1, 1], 1, 0);
+	float y = 64 + floor(sin(time * 0.5) * 8 * 16)/16;
+	float a = 0.75 + sin(time * 0.5) * 0.25;
+	sui_text([0, y], FS_BIG, "DESCENDANTS", [1, 1, 1], a, 0);
+	y += FS_BIG_y;
+	sui_text([0, y], FS_MED, "of the", [1, 1, 1], a * 0.6, 0);
+	y += FS_MED_y;
+	sui_text([0, y], FS_BIG, "HELLBEAST", [1, 1, 1], a, 0);
+	
+	y = 144;
+	sui_text([0, y], FS_NORMAL, "7DRL-2020 game by", [1, 1, 1], 0.6, 0);
+	y += FS_NORMAL_y;
+	sui_text([0, y], FS_NORMAL, "shp and Leonovsky75", [1, 1, 1], 0.6, 0);
 	
 	vector pos = [0, -24];
 	vector size = [120, 140];
@@ -264,10 +276,106 @@ void() main_menu =
 	
 	my_button("mm_start", [0, 8], [size_x - 16, 20], "Start Game") ? localcmd("map bigbox\n") : 0;
 	my_button("mm_settings", [0, 8 + 24], [size_x - 16, 20], "Settings") ? current_menu = MENU_SETTINGS : 0;
-	my_button("mm_help", [0, 8 + 48], [size_x - 16, 20], "Help") ? current_menu = MENU_METAMAP : 0;
-	my_button("mm_tileeditor", [0, 8 + 48 + 24], [size_x - 16, 20], "Tile Editor") ? current_menu = MENU_TILEEDITOR : 0;
+	if (my_button("mm_help", [0, 8 + 48], [size_x - 16, 20], "Help"))
+	{
+		current_tutorial = "start";
+		current_menu = MENU_TUTORIAL;
+	}
+	// my_button("mm_tileeditor", [0, 8 + 48 + 24], [size_x - 16, 20], "Tile Editor") ? current_menu = MENU_TILEEDITOR : 0;
 	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_END]);
 	my_button("mm_quit", [0, -8], [size_x - 16, 20], "Quit") ? localcmd("quit\n") : 0;
+	sui_pop_frame();	
+};
+
+struct tutorial {
+	string map;
+	string title;
+	string line1;
+	string line2;
+	string line3;
+	string line4;
+	string line5;
+	string line6;
+	string line7;
+};
+
+tutorial tutorials[] = {
+	{ "start", "Welcome Trooper", "We've lost contact with", "an arctic research facility.", "We're sending you to investigate", "and to clean up the mess.", "Get to the bottom of it.", "", "Good luck." },
+	{ "cont", "How to play", "Use WSAD and mouse to", "move, aim and shoot.", "Use [SPACE] to melee attack", "and [R] to reload.", "Use [SCROLL WHEEL] to switch", "your equipped weapon.", "All keys can be changed in settings." },
+	{ "inv", "Inventory", "You'll find equipment to help", "you on your journey.", "Use [TAB] to open the inventory", "to see your equipment.", "Use [G] to quickly drop your", "current weapon." },
+	{ "crate", "Loot", "Items are found in these green crates", "all over the facility.", "Use [SPACE] to punch the crate open", "to get your first real weapon." }
+};
+
+
+void() m_close;
+void() tutorial_menu =
+{
+	string currentmap = current_tutorial;
+	int i;
+	for (i = 0; i < tutorials.length; i++)
+	{
+		if (tutorials[i].map == currentmap) break;
+	}
+	if (i >= tutorials.length)
+	{
+		current_menu = MENU_MAIN;
+		m_close();
+		return;
+	}
+	
+	vector pos = [0, 0];
+	vector size = [320, 160];
+	
+	sui_push_frame(pos, size);
+
+	sui_fill([0, 0], size, MENU_BG, 0.75, 0);
+	sui_border_box([0, 0], size, 2, MENU_BORDER, 0.3, 0);
+	
+	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_START]);
+	sui_text([0, 4], FS_MED, tutorials[i].title, MENU_TEXT_1, 1, 0);
+	
+	float xpos = 0;
+	float ypos = 32;
+	sui_text([xpos, ypos], FS_NORMAL, tutorials[i].line1, MENU_TEXT_1, 1, 0);
+	ypos += 8;
+	sui_text([xpos, ypos], FS_NORMAL, tutorials[i].line2, MENU_TEXT_1, 1, 0);
+	ypos += 16;
+	sui_text([xpos, ypos], FS_NORMAL, tutorials[i].line3, MENU_TEXT_1, 1, 0);
+	ypos += 8;
+	sui_text([xpos, ypos], FS_NORMAL, tutorials[i].line4, MENU_TEXT_1, 1, 0);
+	ypos += 16;
+	sui_text([xpos, ypos], FS_NORMAL, tutorials[i].line5, MENU_TEXT_1, 1, 0);
+	ypos += 8;
+	sui_text([xpos, ypos], FS_NORMAL, tutorials[i].line6, MENU_TEXT_1, 1, 0);
+	
+	ypos += 16;
+	sui_text([xpos, ypos], FS_NORMAL, tutorials[i].line7, MENU_TEXT_1, 1, 0);
+	
+	sui_set_align([SUI_ALIGN_START, SUI_ALIGN_END]);
+	if (my_button("tut_close", [8, -8], [80, 20], "Close"))
+	{
+		current_menu = MENU_MAIN;
+		if (clientstate() != 1)
+			m_close();
+	}
+	
+	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_END]);
+	if (i > 0)
+	{
+		if (my_button("tutprev", [0, -8], [80, 20], "Prev"))
+		{
+			current_tutorial = tutorials[i-1].map;
+		}
+	}
+	sui_set_align([SUI_ALIGN_END, SUI_ALIGN_END]);
+	if (i < tutorials.length - 1)
+	{
+		if (my_button("tutnext", [-8, -8], [80, 20], "Next"))
+		{
+			current_tutorial = tutorials[i+1].map;
+		}
+	}
+
 	sui_pop_frame();	
 };
 
@@ -275,6 +383,13 @@ void() tileeditor_menu;
 void(vector size) root_menu =
 {
 	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
+	
+	if (clientstate() == 1)
+	{
+		sui_pic([0, 0], size, "textures/bg.tga", '1 1 1', 1, 0);
+		sui_pic([0, 0], size * (1.5 + sin(time * 0.5) * 0.5), "textures/bg.tga", '1 1 1' * (0.5 + sin(time * 0.5) * 0.5), 1, 1);
+	}
+	
 	sui_fill([0, 0], size, '0 0 0', 0.5, 0);
 	switch (current_menu)
 	{
@@ -283,6 +398,7 @@ void(vector size) root_menu =
 		case MENU_HELP: help_menu(); break;
 		case MENU_METAMAP: metamap_menu(); break;
 		case MENU_TILEEDITOR: tileeditor_menu(); break;
+		case MENU_TUTORIAL: tutorial_menu(); break;
 		default: break;
 	}
 };

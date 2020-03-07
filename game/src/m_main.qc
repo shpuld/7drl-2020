@@ -3,7 +3,7 @@ float menu_active;
 
 float splash_time;
 
-#define MENU_TEST
+// #define MENU_TEST
 void() run_menu_unit_tests =
 {
 	print("Running MENU unit tests...\n");
@@ -13,8 +13,9 @@ void() run_menu_unit_tests =
 
 void() m_init =
 {
-	splash_time = time + 0.5;
+	splash_time = time + 2.5;
 	registercommand("togglemenu2");
+	registercommand("showtutorial");
 	// drawfont = loadfont("", "Courier Prime Code", "12,16,24,32,48,64,72,128,256,512", -1, 0, 0);
 	setcursormode(TRUE,"gfx/xhair", [16, 16], cvar("vid_conautoscale"));
 	current_menu = MENU_MAIN;
@@ -25,6 +26,8 @@ void() m_init =
 	
 	init_m_generation();
 	init_map(&example_meta);
+	
+	localcmd("music 1\n");
 };
 
 vector() randomofs = { return [random() - 0.5, random() - 0.5] * 2; };
@@ -95,6 +98,7 @@ float(float evtype, float scanx, float chary, float devid) Menu_InputEvent =
 		{
 		case "togglemenu":
 			m_close();
+			current_menu = MENU_MAIN;
 			return TRUE;
 			break;
 		default: break;
@@ -108,6 +112,13 @@ float(string cmd) m_consolecommand =
 	tokenize(cmd);
 	switch (argv(0))
 	{
+	case "showtutorial":
+		string which = argv(1);
+		current_menu = MENU_TUTORIAL;
+		current_tutorial = which;
+		m_open();
+		return TRUE;
+		break;
 	default: break;
 	}
 

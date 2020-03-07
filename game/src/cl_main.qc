@@ -146,7 +146,7 @@ void() init_lights =
 // END LIGHTS
 
 
-#define CSQC_TEST
+// #define CSQC_TEST
 void() run_cl_unit_tests =
 {
 	print("Running  CSQC unit tests...\n");

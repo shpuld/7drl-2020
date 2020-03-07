@@ -152,6 +152,7 @@ void() ClientKill =
 //called when a client connects to the server
 void() ClientConnect =
 {
+	localcmd("showtutorial start\n");
 	// print("Client connect\n");
 };
 
