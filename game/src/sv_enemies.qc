@@ -113,11 +113,11 @@ void() enemy_attack =
 			break;
 	}
 	MulticastEnt(self);
-	if (v_forward * normalize(to_player) > 0.95)
+	if (v_forward * normalize(to_player) > 0.94)
 		MulticastEnt(self.enemy);
 	else
 		MulticastEnt(world);
-	MulticastVector(self.origin + v_forward * 8);
+	MulticastVector(self.origin + v_forward * 4);
 	MulticastVector(v_forward);
 	multicast(self.origin, MULTICAST_PVS);
 	
@@ -222,6 +222,9 @@ void() enemy_think =
 		self.think = enemy_think;
 		self.nextthink = time + 0.1;
 	}
+	
+	if (game_over)
+		self.nextthink = 0;
 };
 
 
@@ -313,7 +316,7 @@ void() hell_gunner =
 	self.classname = "enemy_hellgunner";
 	enemy_common();
 	setmodel(self, "models/hellgunner.iqm");
-	self.health = 180 + (current_level - LEVEL_HECK) * 15;
+	self.health = 160 + (current_level - LEVEL_HECK) * 15;
 	self.attack_range = 280;
 	self.move_speed = 15;
 	self.attack_delay = 0.5;
@@ -365,11 +368,11 @@ void() hell_berserker =
 	self.classname = "enemy_hellberserker";
 	enemy_common();
 	setmodel(self, "models/hellberserker.iqm");
-	self.health = 220 + (current_level - LEVEL_HECK) * 20;
+	self.health = 200 + (current_level - LEVEL_HECK) * 16;
 	self.attack_range = 55;
-	self.move_speed = 30;
-	self.attack_delay = 0.3;
-	self.pain_threshold = 30;
+	self.move_speed = 28;
+	self.attack_delay = 0.35;
+	self.pain_threshold = 26;
 	self.yaw_speed = 20;
 };
 
@@ -378,17 +381,17 @@ void() green_berserker =
 	self.classname = "enemy_greenberserker";
 	enemy_common();
 	setmodel(self, "models/greenberserker.iqm");
-	self.health = 160 + (current_level - LEVEL_RUST) * 20;
+	self.health = 150 + (current_level - LEVEL_RUST) * 16;
 	self.attack_range = 55;
 	self.move_speed = 25;
-	self.attack_delay = 0.3;
-	self.pain_threshold = 25;
+	self.attack_delay = 0.35;
+	self.pain_threshold = 26;
 };
 
 
 void() enemy_crawler =
 {
-	if (random() > 0.4 + current_level * 0.06)
+	if (random() > 0.35 + current_level * 0.06)
 	{
 		remove(self);
 		return;

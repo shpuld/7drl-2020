@@ -199,6 +199,23 @@ float(float isnew) ladderlisten =
 	return TRUE;
 };
 
+float explosion_time;
+float(float isnew) machinelisten =
+{
+	float intensity = sin(time * 4) + 0.4;
+	add_light(self.origin + '0 0 32', [intensity, 0.1 * intensity, 0.1 * intensity], 12 * intensity);
+	setsize(self, '-24 -24 0', '24 24 50');
+	self.is_enemy = 2;
+	
+	if (time > explosion_time && victorytime)
+	{
+		spawn_ring(self.origin + '0 0 80' + randomvec() * 40, '0.8 0.5 0.2' + randomvec() * 0.2, 2);
+		explosion_time = time + 0.05 + random() * 0.3;
+		sound(self, CHAN_WEAPON, "sounds/t75.wav", 1, 0.4, 30 + random() * 90);
+	}
+	return TRUE;
+};
+
 .int lighti;
 float(float isnew) lightlisten =
 {
@@ -255,6 +272,7 @@ void(float apiver, string enginename, float enginever) CSQC_Init =
 	deltalisten("models/greenberserker.iqm", enemylisten, 0);
 	deltalisten("models/crate.iqm", cratelisten, 0);
 	deltalisten("models/ladderdown.iqm", ladderlisten, 0);
+	deltalisten("models/machine.iqm", machinelisten, 0);
 	deltalisten("models/power_mod.iqm", powermodlisten, 0);
 	deltalisten("models/bullets_ammo.iqm", ammolisten, 0);
 	deltalisten("models/medkit.iqm", medkitlisten, 0);
@@ -434,9 +452,6 @@ void(float width, float height, float menushown) CSQC_UpdateView =
 	//does what you think it does
 	renderscene();
 	drawpic([0, 0], "lights_postproc", [width, height], [0.25, 0.25, 0.25], 1, 0);
-	
-	float ch_size = 4;
-	drawfill(crosshair_pos - [ch_size/2, ch_size/2], [ch_size, ch_size], '1 1 1', 0.5, 1);
 	
 	
 	if (player && FALSE)
@@ -752,7 +767,7 @@ void() CSQC_Parse_Event =
 			sound(self, CHAN_AUTO, "sounds/reloadbegin.wav", 0.8, 0, 110);
 			type = readbyte();
 			int amount = readbyte();
-			weapon_mags[type] += amount;
+			weapon_mags[type] = min(10, weapon_mags[type] + amount);
 			break;
 		case EV_BOX_BREAK:
 			pos = readvector();
@@ -780,6 +795,9 @@ void() CSQC_Parse_Event =
 		case EV_EXIT_LEVEL:
 			sound(world, CHAN_AUTO, "sounds/ladderdown.wav", 0.9, 0);
 			exittime = time;
+			break;
+		case EV_VICTORY:
+			victorytime = time;
 			break;
 		default:
 			printf("No action for byte %f\n", first);

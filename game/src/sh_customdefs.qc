@@ -14,6 +14,7 @@ const float EV_CLEAR_MAP = 15;
 const float EV_ENEMY_PROJECTILE = 16;
 const float EV_EXIT_LEVEL = 17;
 const float EV_ENTER_LEVEL = 18;
+const float EV_VICTORY = 19;
 
 const int INV_SIZE = 6;
 const int INV_SLOT_WEAPON1 = 0;
@@ -289,7 +290,7 @@ weapon weapon_list[] = {
 	{ "Pump Shotgun", "models/sg.iqm", 18, 0.3, PT_PELLET, 			5, 0.900, 1.6, 6, 0.9, "sounds/shotgun.wav", 100 },
 	{ "Auto Shotgun", "models/autosg.iqm", 14, 0.4, PT_PELLET, 		4, 0.200, 2.2, 8, 0.8, "sounds/shotgun.wav", 110 },
 	{ "DMR", "models/rifle.iqm", 50, 0.85, PT_BIG_BULLET, 			1, 0.650, 1.8, 5, 0.75, "sounds/bigrifle.wav", 100 },
-	{ "LMG", "models/lmg.iqm", 18, 0.6, PT_BIG_BULLET, 				1, 0.150, 3.3, 60, 0.7, "sounds/ShotLMGEQ.wav", 100 }
+	{ "LMG", "models/lmg.iqm", 16, 0.6, PT_BIG_BULLET, 				1, 0.150, 3.3, 60, 0.7, "sounds/ShotLMGEQ.wav", 100 }
 };
 
 void() precache_guns =
@@ -346,6 +347,7 @@ void() precache_everything =
 	precache_model("models/glowstick.iqm");
 	precache_model("models/medkit.iqm");
 	precache_model("models/armor.iqm");
+	precache_model("models/machine.iqm");
 	
 	precache_sound("sounds/t75.wav");
 	precache_sound("sounds/reloadbegin.wav");

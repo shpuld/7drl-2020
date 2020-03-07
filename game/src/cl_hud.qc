@@ -8,15 +8,20 @@ void() draw_inventory =
 	float ypos = g_height - 64;
 	if (!inventory_active)
 	{
+		tokenize(findkeysforcommand("toggleinventory"));
+		string keyname = keynumtostring(stof(argv(0)));
+		if (keyname == "01") keyname = "unbound";
+		
+		drawstring([8, ypos - 16], sprintf("[%s] Inventory", keyname), [8, 8], '1 1 1', 0.4, 0);
 		for (int i = 0; i < 2; i++)
 		{
-			drawpic([0, ypos], "textures/invbg.tga", [176, 16], '0 0.1 0', 1, 1);
-			if (i == active_weapon) drawpic([0, ypos], "textures/invbg.tga", [176, 16], '0.05 0.15 0.05', 1, 1);
+			drawpic([0, ypos], "textures/invbg.tga", [176, 16], '0.1 0.1 0.1', 1, 1);
+			if (i == active_weapon) drawpic([0, ypos], "textures/invbg.tga", [176, 16], '0.1 0.1 0.1', 1, 1);
 			float a = 0.6 + (active_weapon == i) * 0.4;
 			drawstring([8, ypos], sprintf("%s %s", weapon_effects[inv_item_effect[i]].name, weapon_list[inv_item_id[i]].name), [8, 8], '1 1 1', a, 0); 
 			ypos += 8;
 			if (inv_item_id[i])
-				drawstring([8, ypos], sprintf("Ammo: %.0f/%.0f  Mags: %.0f", inv_item_ammo[i], max_ammo_for(i), weapon_mags[inv_item_id[i]]), [8, 8], '1 1 1', a, 0); 
+				drawstring([8, ypos], sprintf("Ammo: %.0f/%.0f  Mags: %.0f", inv_item_ammo[i], max_ammo_for(i), weapon_mags[inv_item_id[i]]), [8, 8], '0.9 0.9 0.9', a, 0); 
 			ypos += 8;
 		}
 	}
@@ -31,14 +36,19 @@ void() draw_inventory =
 	{
 		string strings[4];
 		strings[0] = "Press USE to pick up";
+		float full = FALSE;
 		if (pu_item_type == IT_WEAPON)
 		{
+			if (inv_item_id[INV_SLOT_WEAPON1] != 0 && inv_item_id[INV_SLOT_WEAPON2] != 0)
+				full = TRUE;
 			strings[1] = pu_item_effect ? sprintf("%s %s", weapon_effects[pu_item_effect].name, weapon_list[pu_item_id].name) : weapon_list[pu_item_id].name;
 			strings[2] = strpad(16, weapon_stats_string(pu_item_effect, 1));
 			strings[3] = strpad(16, weapon_stats_string(pu_item_effect, 2));
 		}
 		else if (pu_item_type == IT_POWERMOD)
 		{
+			if (inv_item_id[INV_SLOT_MOD1] != 0 && inv_item_id[INV_SLOT_MOD2] != 0 && inv_item_id[INV_SLOT_MOD3] != 0)
+				full = TRUE;
 			strings[1] = "Power Module";
 			strings[2] = strpad(16, powermod_stats_string(pu_item_effect, 1));
 			strings[3] = strpad(16, powermod_stats_string(pu_item_effect, 2));
@@ -55,15 +65,18 @@ void() draw_inventory =
 		}
 		else if (pu_item_type == IT_ARMOR)
 		{
+			if (inv_item_id[INV_SLOT_ARMOR] != 0)
+				full = TRUE;
 			strings[1] = sprintf("%s", armor_effects[pu_item_effect].name);
 			strings[2] = sprintf("+%.0f Defense", armor_effects[pu_item_effect].level1);
 			strings[3] = "";
 		}
-
+		if (full) strings[0] = "Inventory full, can't pick up";
+		vector col = full ? '1 0.8 0.6' : '1 1 1';
 		for (int i = 0; i < strings.length; i++)
 		{
 			float ofs = i > 0 ? i*8 + 8 : 0;
-			drawstring([g_width/2 - 4*strlen(strings[i]), g_height - 100 + ofs], strings[i], '8 8 0', '1 1 1', 0.8, 0);
+			drawstring([g_width/2 - 4*strlen(strings[i]), g_height - 100 + ofs], strings[i], [8, 8], col, 0.8, 0);
 		}
 	}
 };
@@ -75,14 +88,16 @@ void() draw_ammo =
 	drawstring([128, g_height - 16], ftos(ammo_cells), [16, 16], '1 1 1', 1, 0);
 };
 
+float old_hp;
+float dmg_amount;
+
 void() draw_health =
 {
 	string hpstr = sprintf("%.0f/100HP", getstatf(STAT_HEALTH));
-	drawstring([8, g_height - 16], hpstr, [16, 16], '1 1 1', 1, 0);
+	drawpic([0, g_height - 32], "textures/hpbg.tga", [256, 32], '0.15 0.15 0.15', 1, 1);
+	drawstring([8, g_height - 24], hpstr, [16, 16], '1 1 1', 1, 0);
 };
 
-float old_hp;
-float dmg_amount;
 void() draw_dmg =
 {
 	float hp = getstatf(STAT_HEALTH);
@@ -116,6 +131,40 @@ void() draw_transition =
 	drawstring([g_width/2 - 8 * strlen(str), g_height/2 - 64], str, [16, 16], '1 1 1', a, 0);
 }
 
+void() draw_crosshair =
+{
+	float ch_size = 4;
+	drawfill(crosshair_pos - [ch_size/2 + 2, ch_size/2], [ch_size + 4, ch_size], '0 0 0', 0.5, 0);
+	drawfill(crosshair_pos - [ch_size/2, ch_size/2 + 2], [ch_size, ch_size + 4], '0 0 0', 0.5, 0);
+	drawfill(crosshair_pos - [ch_size/2, ch_size/2], [ch_size, ch_size], '1 1 1', 0.75, 1);
+};
+
+float gameover_overlay;
+void() draw_gameover =
+{
+	string str, str2;
+	if (getstatf(STAT_HEALTH) <= 0)
+	{
+		gameover_overlay = min(1, gameover_overlay + frametime);
+		drawfill([0, 0], [g_width, g_height], '0 0 0', gameover_overlay * 0.8, 0);
+		str = "GAME OVER";
+		str2 = "Start a new game in ESCAPE menu";
+		drawstring([g_width/2 - 8*strlen(str), g_height/2 - 64], str, [16, 16], '1 0 0', gameover_overlay, 0);
+		drawstring([g_width/2 - 4*strlen(str2), g_height/2 - 32], str2, [8, 8], '1 0 0', gameover_overlay, 0);
+	}
+	else if (victorytime)
+	{
+		float diff = time - victorytime;
+		float texta = min(1.0, diff);
+		drawfill([0, 0], [g_width, g_height], '0 0 0', texta * 0.8, 0);
+		str = "VICTORY!";
+		str2 = "Well done! Thank you for playing!";
+		drawstring([g_width/2 - 8*strlen(str), g_height/2 - 64], str, [16, 16], '0.5 1 0.5', texta, 0);
+		drawstring([g_width/2 - 4*strlen(str2), g_height/2 - 32], str2, [8, 8], '0.5 1 0.5', texta, 0);
+	}
+	
+}
+
 void() draw_hud =
 {
 	draw_transition();
@@ -123,6 +172,8 @@ void() draw_hud =
 	// draw_ammo();
 	draw_health();
 	draw_dmg();
+	draw_crosshair();
+	draw_gameover();
 };
 
 void(vector pos, float width, int slot) draw_inventory_weapon =
@@ -137,6 +188,9 @@ void(vector pos, float width, int slot) draw_inventory_weapon =
 	sui_push_frame([pos_x, pos_y], size);
 	
 	sui_fill([0, 0], size, '0.3 0.3 0.3', 0.4, 0);
+	
+	if (slot == active_weapon)
+		sui_border_box([0, 0], size, 1, '0.5 0.5 0.5', 0.4, 0);
 
 	if (inv_item_id[slot] == 0)
 	{

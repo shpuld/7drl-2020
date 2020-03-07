@@ -75,3 +75,7 @@ float camshake;
 float entertime;
 float exittime;
 
+float victorytime;
+
+
+

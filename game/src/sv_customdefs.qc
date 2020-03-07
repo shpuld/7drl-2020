@@ -12,6 +12,8 @@ vector test_spawnpoint;
 .void(entity attacker, vector dir, float amount) hurt;
 .void(entity attacker, vector dir, float amount) die;
 
+float game_over;
+
 void(float event) BeginEvent =
 {
 	WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);

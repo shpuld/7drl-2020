@@ -5,6 +5,8 @@ void(entity target, entity attacker, vector dir, float amount) damage =
 	if (!target.takes_damage) return;
 	if (target.health <= 0) return;
 	
+	if (game_over) return;
+	
 	target.health -= amount;
 	if (target.health <= 0)
 	{

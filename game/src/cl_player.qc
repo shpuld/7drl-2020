@@ -9,6 +9,7 @@ const float FRAME_RUN = 1;
 const float FRAME_MELEE = 2;
 const float FRAME_RELOAD = 3;
 const float FRAME_SWAP = 4;
+const float FRAME_DIE = 5;
 
 const float MELEE_SLOWDOWN = 0.2;
 
@@ -166,6 +167,11 @@ float() player_predraw =
 		self.lerpfrac = min(0.3, self.lerpfrac);
 		self.frame1time += frametime;
 		if (self.frame1time > 0.15) self.frame = FRAME_IDLE;
+	}
+	else if (self.frame == FRAME_DIE)
+	{
+		self.lerpfrac = 0;
+		self.frame1time += frametime;
 	}
     // addentity(self);
     self.oldframe = self.frame;
@@ -716,12 +722,25 @@ void() swap_weapon =
 	self.frame1time = 0;
 }
 
+vector last_ang;
+
 void() set_input_movevalues =
 {
 	if (!player)
 	{
 		input_movevalues = '0 0 0';
 		return;
+	}
+	
+	if (getstatf(STAT_HEALTH) <= 0)
+	{
+		input_movevalues = '0 0 0';
+		input_buttons = 0;
+	}
+	
+	if (self.frame == FRAME_DIE)
+	{
+		input_angles = last_ang;
 	}
 
 	float basespeed = 220;
@@ -746,6 +765,7 @@ void() set_input_movevalues =
 }
 
 float regentick;
+
 void() CSQC_Input_Frame =
 {
 	set_input_movevalues();
@@ -753,7 +773,18 @@ void() CSQC_Input_Frame =
 	input_angles = aim_normalized;
 
 	if (!player) return;
-	
+
+	if (getstatf(STAT_HEALTH) <= 0)
+	{
+		if (self.frame != FRAME_DIE)
+		{
+			self.frame = FRAME_DIE;
+			self.frame1time = 0;
+			last_ang = input_angles;
+		}
+		return;
+	}
+
 	if (reloading && time >= reload_finished)
 	{
 		reload_fill(active_weapon);
