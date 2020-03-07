@@ -188,3 +188,27 @@ restart
 vid_reload
 restart
 snd_restart
+restart
+vid_reload
+vid_reload
+/sensitivity 1
+vid_reload
+gl_texturemode
+gl_texturemode gl_nearest
+gl_texturemode2d gl_nearest
+restart
+snd_restart
+restart
+restart
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+restart
+restart
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+vid_reload
+restart

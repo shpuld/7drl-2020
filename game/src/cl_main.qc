@@ -209,9 +209,9 @@ float(float isnew) machinelisten =
 	
 	if (time > explosion_time && victorytime)
 	{
-		spawn_ring(self.origin + '0 0 80' + randomvec() * 40, '0.8 0.5 0.2' + randomvec() * 0.2, 2);
+		spawn_ring(self.origin + '0 0 80' + randomvec() * 40, '0.8 0.5 0.2' + randomvec() * 0.2, 1 + random() * 4);
 		explosion_time = time + 0.05 + random() * 0.3;
-		sound(self, CHAN_WEAPON, "sounds/t75.wav", 1, 0.4, 30 + random() * 90);
+		sound(self, CHAN_WEAPON, "sounds/t75.wav", 1, 0.4, 80 + random() * 30);
 	}
 	return TRUE;
 };
